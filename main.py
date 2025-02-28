@@ -11,10 +11,7 @@ class MainWindow(FluentWindow):
         self.setGeometry(0, 0, 688, 590)
         self.setStyleSheet("@import url('https://cdn.jsdelivr.net/gh/zhiyiYo/PyQt-Fluent-Widgets@main/qfluentwidgets.qss');")
 
-        main_widget = QWidget()
-        self.setCentralWidget(main_widget)
-
-        main_layout = QVBoxLayout(main_widget)
+        main_layout = QVBoxLayout(self)
         main_layout.setSpacing(18)
         main_layout.setContentsMargins(24, 24, 24, 0)
 
