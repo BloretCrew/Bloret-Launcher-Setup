@@ -71,11 +71,11 @@ class Page1(QWidget):
         
         info_label = BodyLabel("将安装 / About to install :")
         app_label = StrongBodyLabel("Bloret Launcher")
-        version_label = StrongBodyLabel("25.0")
+        self.version_label = StrongBodyLabel("25.0")  # 改为实例变量
         
         info_layout.addWidget(info_label)
         info_layout.addWidget(app_label)
-        info_layout.addWidget(version_label)
+        info_layout.addWidget(self.version_label)
         info_layout.addStretch()
         
         title_layout.addLayout(info_layout)
@@ -113,3 +113,7 @@ class Page1(QWidget):
                 background-color: transparent;
             }
         """)
+    
+    def update_version(self, version):
+        """更新版本信息显示"""
+        self.version_label.setText(version)

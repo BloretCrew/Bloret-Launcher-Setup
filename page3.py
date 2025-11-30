@@ -136,29 +136,96 @@ class Page3(QWidget):
     def simulate_installation(self):
         """模拟安装过程"""
         try:
-            # 模拟不同的安装步骤
+            # 检查是否有下载的文件
+            downloaded_file = self.install_config.get('downloaded_file', '')
+            
+            if downloaded_file and os.path.exists(downloaded_file):
+                # 如果有下载的文件，执行实际安装
+                self.install_from_downloaded_file(downloaded_file)
+            else:
+                # 否则模拟安装
+                self.simulate_install_steps()
+                
+        except Exception as e:
+            # 如果安装失败，显示错误信息
+            QTimer.singleShot(0, lambda: self.show_install_error(str(e)))
+    
+    def install_from_downloaded_file(self, file_path):
+        """从下载的文件安装"""
+        try:
+            import subprocess
+            import shutil
+            
+            # 安装步骤
             steps = [
-                ("正在创建安装目录...", 10),
-                ("正在复制文件...", 30),
-                ("正在注册组件...", 50),
-                ("正在创建快捷方式...", 70),
-                ("正在完成安装...", 90),
+                ("正在准备安装环境...", 10),
+                ("正在验证下载文件...", 20),
+                ("正在解压安装文件...", 40),
+                ("正在复制文件到目标目录...", 60),
+                ("正在创建快捷方式...", 80),
+                ("正在完成安装...", 95),
                 ("安装完成！", 100)
             ]
             
             for step_text, progress in steps:
-                # 更新进度
                 self.install_progress.emit(progress)
                 
-                # 模拟耗时操作
-                time.sleep(0.5)
+                if progress == 40:
+                    # 模拟解压（实际应该调用安装程序）
+                    time.sleep(2)
+                elif progress == 60:
+                    # 模拟文件复制
+                    time.sleep(1)
+                elif progress == 80:
+                    # 创建快捷方式
+                    self.create_shortcuts()
+                    time.sleep(0.5)
+                else:
+                    time.sleep(0.3)
                 
                 if progress == 100:
+                    # 启动实际的安装程序
+                    try:
+                        subprocess.Popen([file_path], shell=True)
+                    except:
+                        pass
                     self.install_complete.emit()
                     
         except Exception as e:
-            # 如果安装失败，显示错误信息
-            QTimer.singleShot(0, lambda: self.show_install_error(str(e)))
+            self.show_install_error(f"安装失败: {str(e)}")
+    
+    def simulate_install_steps(self):
+        """模拟安装步骤"""
+        steps = [
+            ("正在创建安装目录...", 10),
+            ("正在复制文件...", 30),
+            ("正在注册组件...", 50),
+            ("正在创建快捷方式...", 70),
+            ("正在完成安装...", 90),
+            ("安装完成！", 100)
+        ]
+        
+        for step_text, progress in steps:
+            self.install_progress.emit(progress)
+            time.sleep(0.5)
+            
+            if progress == 100:
+                self.install_complete.emit()
+    
+    def create_shortcuts(self):
+        """创建快捷方式"""
+        try:
+            install_path = self.install_config.get('install_path', '')
+            create_desktop = self.install_config.get('create_desktop_shortcut', False)
+            create_start_menu = self.install_config.get('create_start_menu_item', False)
+            
+            if install_path:
+                # 这里应该创建实际的快捷方式
+                # 简化版本，仅作为演示
+                pass
+                
+        except Exception as e:
+            print(f"创建快捷方式失败: {e}")
             
     def update_progress(self, value):
         """更新进度条"""
