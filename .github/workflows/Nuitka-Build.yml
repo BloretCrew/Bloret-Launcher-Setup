@@ -1,0 +1,193 @@
+name: 安装向导打包 - Nuitka
+
+permissions:
+  contents: write
+
+on:
+  release:
+    types: [prereleased]
+
+jobs:
+  Build-Installer:
+    runs-on: windows-latest
+
+    env:
+      PYTHON_VERSION: '3.9'
+      OUTPUT_DIR: 'output'
+      ARTIFACT_NAME: 'Bloret-Launcher-Installer-Windows.zip'
+
+    steps:
+    - name: 检出最新版本
+      uses: actions/checkout@v2
+      with:
+        ref: 'Windows'
+
+    - name: 验证安装向导资源文件路径
+      run: |
+        Get-ChildItem -Path .
+        if (-not (Test-Path "bloret.ico")) { Write-Host "bloret.ico not found"; exit 1 }
+        if (-not (Test-Path "ui")) { Write-Host "ui directory not found"; exit 1 }
+        if (-not (Test-Path "requirements.txt")) { Write-Host "requirements.txt not found"; exit 1 }
+        if (-not (Test-Path "installer_v2.py")) { Write-Host "installer_v2.py not found"; exit 1 }
+        if (-not (Test-Path "page1.py")) { Write-Host "page1.py not found"; exit 1 }
+        if (-not (Test-Path "page2_1.py")) { Write-Host "page2_1.py not found"; exit 1 }
+        if (-not (Test-Path "page2_2.py")) { Write-Host "page2_2.py not found"; exit 1 }
+        if (-not (Test-Path "page3.py")) { Write-Host "page3.py not found"; exit 1 }
+      shell: pwsh
+
+    - name: 设置 Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: 安装程序依赖和打包依赖
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pillow
+        pip install nuitka
+    
+    - name: 使用 Nuitka 打包安装向导
+      run: |
+        python -m nuitka --standalone --onefile --windows-console-mode=disable --enable-plugin=pyqt6 --include-qt-plugins=sensible,styles --windows-icon-from-ico=bloret.ico --output-file=Bloret-Launcher-Installer.exe --assume-yes-for-downloads `
+          --include-data-dir=ui=ui `
+          --include-data-files=page1.py=page1.py `
+          --include-data-files=page2_1.py=page2_1.py `
+          --include-data-files=page2_2.py=page2_2.py `
+          --include-data-files=page3.py=page3.py `
+          --include-data-files=requirements.txt=requirements.txt `
+          --include-data-files=README.md=README.md `
+          --include-data-files=LICENSE=LICENSE `
+          --include-data-files=PROJECT_SUMMARY.md=PROJECT_SUMMARY.md `
+          --include-data-files=run_installer.bat=run_installer.bat `
+          --include-data-files=setup.py=setup.py `
+          --include-data-files=installer.py=installer.py `
+          installer_v2.py
+      shell: pwsh
+
+    - name: 创建安装向导输出目录
+      run: |
+        mkdir -p ${{ env.OUTPUT_DIR }}
+        cp Bloret-Launcher-Installer.exe ${{ env.OUTPUT_DIR }}/
+        cp -r ui/ ${{ env.OUTPUT_DIR }}/
+        cp installer.py ${{ env.OUTPUT_DIR }}/
+        cp installer_v2.py ${{ env.OUTPUT_DIR }}/
+        cp page1.py ${{ env.OUTPUT_DIR }}/
+        cp page2_1.py ${{ env.OUTPUT_DIR }}/
+        cp page2_2.py ${{ env.OUTPUT_DIR }}/
+        cp page3.py ${{ env.OUTPUT_DIR }}/
+        cp requirements.txt ${{ env.OUTPUT_DIR }}/
+        cp run_installer.bat ${{ env.OUTPUT_DIR }}/
+        cp setup.py ${{ env.OUTPUT_DIR }}/
+        cp LICENSE ${{ env.OUTPUT_DIR }}/
+        cp README.md ${{ env.OUTPUT_DIR }}/
+        cp PROJECT_SUMMARY.md ${{ env.OUTPUT_DIR }}/
+        cp bloret.ico ${{ env.OUTPUT_DIR }}/
+
+    - name: 上传安装向导构建产物
+      uses: actions/upload-artifact@v4
+      with:
+        name: Bloret-Launcher-Installer
+        path: Bloret-Launcher-Installer.exe
+        
+  Upload-To-Release:
+    needs: [Build-Installer]
+    runs-on: ubuntu-latest
+    steps:
+      - name: 下载安装向导构建产物
+        uses: actions/download-artifact@v4
+        with:
+          name: Bloret-Launcher-Installer
+          path: Bloret-Launcher-Installer
+
+      - name: 创建安装向导发布压缩包
+        run: |
+          Compress-Archive -Path "Bloret-Launcher-Installer/*" -DestinationPath "Bloret-Launcher-Installer.zip" -Force
+        shell: pwsh
+
+      - name: 上传到Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            Bloret-Launcher-Installer.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  Code-Package:
+    runs-on: windows-latest
+
+    steps:
+    - name: 检出最新版本
+      uses: actions/checkout@v2
+      with:
+        ref: 'Windows'
+
+    - name: 创建输出目录并清理
+      run: |
+        # 强制创建目录并清理旧内容
+        New-Item -ItemType Directory -Force -Path "output"
+        Remove-Item -Path "output/*" -Recurse -ErrorAction Ignore
+      shell: pwsh
+
+    - name: 复制安装向导源代码文件
+      run: |
+        # 复制安装向导相关文件到 output 目录
+        $filesToCopy = @(
+          "installer.py",
+          "installer_v2.py", 
+          "page1.py",
+          "page2_1.py",
+          "page2_2.py", 
+          "page3.py",
+          "requirements.txt",
+          "run_installer.bat",
+          "setup.py",
+          "bloret.ico",
+          "LICENSE",
+          "README.md",
+          "PROJECT_SUMMARY.md"
+        )
+        
+        foreach ($file in $filesToCopy) {
+          if (Test-Path $file) {
+            Copy-Item -Path $file -Destination "output\"
+          }
+        }
+        
+        # 复制 ui 目录
+        if (Test-Path "ui") {
+          Copy-Item -Path "ui" -Destination "output\" -Recurse
+        }
+        
+        # 确保 LICENSE 文件被复制
+        if (-not (Test-Path "output/LICENSE")) {
+          Write-Host "LICENSE 文件未找到"
+          exit 1
+        }
+      shell: pwsh
+
+    - name: 创建源代码压缩包
+      run: |
+        # 直接压缩 output 目录内容为 Code-Package.zip
+        Compress-Archive -Path "output/*" -DestinationPath "output/Code-Package.zip" -Force
+      shell: pwsh
+
+    - name: 上传源代码压缩包
+      uses: actions/upload-artifact@v4
+      with:
+        name: Installer-Code-Package
+        path: "output/Code-Package.zip"
+  
+
+    # - name: 更新为测试版
+    #   run: |
+    #     # 从GitHub事件中提取版本信息
+    #     VERSION="${{ github.event.release.tag_name }}"
+    #     VERSION_NAME="${{ github.event.release.name }}"
+    #     DESCRIPTION=${{ toJSON(github.event.release.body) }}
+        
+    #     # 调用API更新为测试版
+    #     curl -X POST https://launcher.bloret.net/api/newversion/github \
+    #       -H "Content-Type: application/json" \
+    #       -d "{\"key\":\"${{ secrets.BLORET_LAUNCHER_WEBSITE }}\",\"beta\":true,\"version\":\"$VERSION\",\"versionName\":\"$VERSION_NAME\",\"description\":$DESCRIPTION}"
+    #   shell: bash
