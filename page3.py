@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
 import time
 import threading
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel
-from PyQt6.QtCore import Qt, pyqtSignal, QTimer
-from PyQt6.QtGui import QPixmap
+import logging
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel
+from PyQt5.QtCore import Qt, pyqtSignal, QTimer
+from PyQt5.QtGui import QPixmap
 
 from qfluentwidgets import (SmoothScrollArea, TitleLabel, ProgressBar, StrongBodyLabel, 
                             CardWidget, SubtitleLabel, PrimaryPushButton, InfoBar, InfoBarPosition)
+
+# 获取logger
+logger = logging.getLogger(__name__)
 
 
 class Page3(QWidget):
@@ -36,7 +41,7 @@ class Page3(QWidget):
         scroll_layout.setSpacing(20)
         
         # 标题
-        self.title_label = TitleLabel("正在安装 Bloret Launcher / Installing Bloret Launcher")
+        self.title_label = TitleLabel("正在安装 Bloret Launcher\nInstalling Bloret Launcher")
         scroll_layout.addWidget(self.title_label)
         
         # 进度条区域
@@ -61,7 +66,7 @@ class Page3(QWidget):
         intro_layout.setSpacing(15)
         
         # 卡片标题
-        card_title = SubtitleLabel("来认识一下 Bloret Launcher / Come and get to know Bloret Launcher")
+        card_title = SubtitleLabel("来认识一下 Bloret Launcher\nCome and get to know Bloret Launcher")
         intro_layout.addWidget(card_title)
         
         # 图片展示区域
@@ -79,10 +84,10 @@ class Page3(QWidget):
                 self.image_label.setPixmap(pixmap)
             else:
                 self.image_label.setText("图片加载失败")
-                self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.image_label.setAlignment(Qt.AlignCenter)
         except:
             self.image_label.setText("图片加载失败")
-            self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.image_label.setAlignment(Qt.AlignCenter)
         
         image_layout.addWidget(self.image_label)
         image_layout.addStretch()
@@ -124,37 +129,49 @@ class Page3(QWidget):
         
     def start_installation(self, install_config):
         """开始安装"""
+        logger.info(f"Page3: 开始安装流程")
+        logger.info(f"安装配置: {install_config}")
         self.install_config = install_config
         self.progress_bar.setValue(0)
         self.progress_label.setText("0%")
         
         # 在后台线程中执行安装
+        logger.info(f"创建安装线程")
         self.install_thread = threading.Thread(target=self.simulate_installation)
         self.install_thread.daemon = True
         self.install_thread.start()
+        logger.info(f"安装线程已启动")
         
     def simulate_installation(self):
         """模拟安装过程"""
+        logger.info(f"模拟安装过程开始")
         try:
             # 检查是否有下载的文件
             downloaded_file = self.install_config.get('downloaded_file', '')
+            logger.info(f"检查下载的文件: {downloaded_file}")
             
             if downloaded_file and os.path.exists(downloaded_file):
+                logger.info(f"找到下载的文件，执行实际安装: {downloaded_file}")
                 # 如果有下载的文件，执行实际安装
                 self.install_from_downloaded_file(downloaded_file)
             else:
+                logger.info(f"未找到下载的文件，执行模拟安装")
                 # 否则模拟安装
                 self.simulate_install_steps()
                 
         except Exception as e:
+            logger.error(f"安装过程失败: {e}")
+            logger.error(traceback.format_exc())
             # 如果安装失败，显示错误信息
             QTimer.singleShot(0, lambda: self.show_install_error(str(e)))
     
     def install_from_downloaded_file(self, file_path):
         """从下载的文件安装"""
+        temp_extract_dir = None
         try:
             import subprocess
             import shutil
+            import zipfile
             
             # 安装步骤
             steps = [
@@ -167,14 +184,44 @@ class Page3(QWidget):
                 ("安装完成！", 100)
             ]
             
+            # 获取安装路径
+            install_path = self.install_config.get('install_path', '')
+            
             for step_text, progress in steps:
                 self.install_progress.emit(progress)
                 
                 if progress == 40:
-                    # 模拟解压（实际应该调用安装程序）
+                    # 解压文件（如果是zip文件）
+                    logger.info(f"进度40%: 处理文件 {file_path}")
+                    if file_path.endswith('.zip'):
+                        logger.info(f"检测到zip文件，开始解压: {file_path}")
+                        # 创建临时解压目录
+                        temp_extract_dir = os.path.join(os.path.dirname(file_path), 'bloret_temp')
+                        logger.info(f"创建临时解压目录: {temp_extract_dir}")
+                        os.makedirs(temp_extract_dir, exist_ok=True)
+                        logger.info(f"临时解压目录创建成功: {temp_extract_dir}")
+                        
+                        # 解压zip文件
+                        logger.info(f"开始解压zip文件到: {temp_extract_dir}")
+                        with zipfile.ZipFile(file_path, 'r') as zip_ref:
+                            zip_ref.extractall(temp_extract_dir)
+                        logger.info(f"zip文件解压完成")
+                        
+                        # 查找解压后的安装程序
+                        logger.info(f"在解压目录中查找安装程序: {temp_extract_dir}")
+                        installer_exe = self.find_installer_exe(temp_extract_dir)
+                        logger.info(f"找到的安装程序: {installer_exe}")
+                        if installer_exe:
+                            file_path = installer_exe  # 更新为解压后的安装程序路径
+                            logger.info(f"更新安装程序路径为: {file_path}")
+                        else:
+                            raise Exception("在zip文件中未找到安装程序")
+                    else:
+                        logger.info(f"不是zip文件，直接使用原路径: {file_path}")
+                    
                     time.sleep(2)
                 elif progress == 60:
-                    # 模拟文件复制
+                    # 文件复制
                     time.sleep(1)
                 elif progress == 80:
                     # 创建快捷方式
@@ -186,16 +233,126 @@ class Page3(QWidget):
                 if progress == 100:
                     # 启动实际的安装程序
                     try:
-                        subprocess.Popen([file_path], shell=True)
-                    except:
-                        pass
+                        logger.info(f"准备启动安装程序，文件路径: {file_path}")
+                        logger.info(f"检查安装程序是否存在: {os.path.exists(file_path)}")
+                        if os.path.exists(file_path):
+                            logger.info(f"正在启动安装程序: {file_path}")
+                            result = subprocess.Popen([file_path], shell=True)
+                            logger.info(f"安装程序启动结果: {result}")
+                        else:
+                            logger.error(f"安装程序文件不存在: {file_path}")
+                            raise Exception(f"安装程序文件不存在: {file_path}")
+                    except Exception as e:
+                        logger.error(f"启动安装程序失败: {e}")
+                        import traceback
+                        traceback.print_exc()
+                        raise
                     self.install_complete.emit()
                     
         except Exception as e:
+            logger.error(f"安装过程捕获异常: {e}")
+            logger.error(traceback.format_exc())
             self.show_install_error(f"安装失败: {str(e)}")
+        finally:
+            # 清理临时文件 - 确保传递正确的参数
+            logger.info(f"finally块: 准备清理临时文件")
+            logger.info(f"finally块: file_path = {file_path}")
+            logger.info(f"finally块: temp_extract_dir = {temp_extract_dir}")
+            
+            # 确定要清理的下载文件路径
+            cleanup_file = None
+            if 'downloaded_file' in self.install_config:
+                cleanup_file = self.install_config['downloaded_file']
+                logger.info(f"使用安装配置中的下载文件: {cleanup_file}")
+            elif file_path and file_path.endswith('.zip'):
+                cleanup_file = file_path
+                logger.info(f"使用当前的zip文件路径: {cleanup_file}")
+            
+            self.cleanup_temp_files(cleanup_file, temp_extract_dir)
+    
+    def find_installer_exe(self, extract_dir):
+        """在解压目录中查找安装程序"""
+        try:
+            logger.info(f"开始在目录中查找安装程序: {extract_dir}")
+            # 常见的安装程序名称
+            installer_names = ['setup.exe', 'install.exe', 'Bloret-Launcher-Setup.exe', 
+                             'Bloret Launcher Setup.exe', 'BloretLauncherSetup.exe']
+            
+            # 遍历解压目录
+            logger.debug(f"遍历解压目录: {extract_dir}")
+            for root, dirs, files in os.walk(extract_dir):
+                logger.debug(f"检查目录: {root}")
+                logger.debug(f"文件列表: {files}")
+                for file in files:
+                    file_lower = file.lower()
+                    logger.debug(f"检查文件: {file} (小写: {file_lower})")
+                    # 检查是否是exe文件且名称匹配常见的安装程序名称
+                    if file_lower.endswith('.exe') and any(name in file_lower for name in [n.lower() for n in installer_names]):
+                        full_path = os.path.join(root, file)
+                        logger.info(f"找到匹配的安装程序: {full_path}")
+                        return full_path
+                    # 如果是exe文件但不是特定的安装程序名称，也返回第一个exe
+                    elif file_lower.endswith('.exe'):
+                        full_path = os.path.join(root, file)
+                        logger.debug(f"找到exe文件: {full_path}")
+                        return full_path
+            
+            # 如果没找到特定名称的exe，返回第一个exe文件
+            logger.debug(f"未找到特定安装程序，返回第一个exe文件")
+            for root, dirs, files in os.walk(extract_dir):
+                for file in files:
+                    if file.lower().endswith('.exe'):
+                        full_path = os.path.join(root, file)
+                        logger.info(f"找到第一个exe文件: {full_path}")
+                        return full_path
+            
+            logger.warning(f"在目录 {extract_dir} 中未找到任何exe文件")
+            return None
+        except Exception as e:
+            logger.error(f"查找安装程序失败: {e}")
+            logger.error(traceback.format_exc())
+            return None
+    
+    def cleanup_temp_files(self, downloaded_file, temp_extract_dir):
+        """清理临时文件"""
+        try:
+            logger.info(f"开始清理临时文件...")
+            logger.info(f"下载文件: {downloaded_file}")
+            logger.info(f"临时解压目录: {temp_extract_dir}")
+            
+            # 清理下载的zip文件
+            if downloaded_file and downloaded_file.endswith('.zip'):
+                logger.debug(f"检查下载的zip文件是否存在: {os.path.exists(downloaded_file)}")
+                if os.path.exists(downloaded_file):
+                    logger.info(f"正在删除下载的zip文件: {downloaded_file}")
+                    os.remove(downloaded_file)
+                    logger.info(f"已删除下载的zip文件: {downloaded_file}")
+                else:
+                    logger.warning(f"下载的zip文件不存在: {downloaded_file}")
+            else:
+                logger.debug(f"无需清理下载文件: {downloaded_file}")
+            
+            # 清理临时解压目录
+            if temp_extract_dir:
+                logger.debug(f"检查临时解压目录是否存在: {os.path.exists(temp_extract_dir)}")
+                if os.path.exists(temp_extract_dir):
+                    logger.info(f"正在清理临时解压目录: {temp_extract_dir}")
+                    import shutil
+                    shutil.rmtree(temp_extract_dir)
+                    logger.info(f"已清理临时解压目录: {temp_extract_dir}")
+                else:
+                    logger.warning(f"临时解压目录不存在: {temp_extract_dir}")
+            else:
+                logger.debug(f"无需清理临时解压目录")
+                
+        except Exception as e:
+            logger.error(f"清理临时文件失败: {e}")
+            logger.error(traceback.format_exc())
     
     def simulate_install_steps(self):
         """模拟安装步骤"""
+        logger.info(f"开始模拟安装步骤")
+        
         steps = [
             ("正在创建安装目录...", 10),
             ("正在复制文件...", 30),
@@ -206,29 +363,41 @@ class Page3(QWidget):
         ]
         
         for step_text, progress in steps:
+            logger.debug(f"模拟安装步骤: {step_text} (进度: {progress}%)")
             self.install_progress.emit(progress)
             time.sleep(0.5)
             
             if progress == 100:
+                logger.info(f"模拟安装步骤完成")
                 self.install_complete.emit()
     
     def create_shortcuts(self):
         """创建快捷方式"""
+        logger.info(f"开始创建快捷方式")
+        
         try:
             install_path = self.install_config.get('install_path', '')
             create_desktop = self.install_config.get('create_desktop_shortcut', False)
             create_start_menu = self.install_config.get('create_start_menu_item', False)
+            
+            logger.info(f"安装路径: {install_path}")
+            logger.info(f"桌面快捷方式: {create_desktop}")
+            logger.info(f"开始菜单快捷方式: {create_start_menu}")
             
             if install_path:
                 # 这里应该创建实际的快捷方式
                 # 简化版本，仅作为演示
                 pass
                 
+            logger.info(f"快捷方式创建完成")
+                
         except Exception as e:
-            print(f"创建快捷方式失败: {e}")
+            logger.error(f"创建快捷方式失败: {e}")
+            logger.error(traceback.format_exc())
             
     def update_progress(self, value):
         """更新进度条"""
+        logger.debug(f"更新进度条: {value}%")
         self.progress_bar.setValue(value)
         self.progress_label.setText(f"{value}%")
         
@@ -244,6 +413,7 @@ class Page3(QWidget):
             
     def on_install_complete(self):
         """安装完成"""
+        logger.info("显示安装成功")
         self.progress_bar.setValue(100)
         self.progress_label.setText("100%")
         self.finish_button.setVisible(True)
@@ -261,6 +431,7 @@ class Page3(QWidget):
         
     def show_install_error(self, error_msg):
         """显示安装错误"""
+        logger.error(f"显示安装错误: {error_msg}")
         InfoBar.error(
             title='安装失败',
             content=f'安装过程中出现错误: {error_msg}',
@@ -275,3 +446,24 @@ class Page3(QWidget):
         """完成安装"""
         if self.parent:
             self.parent.close()
+
+    def apply_theme(self, is_dark=None):
+        """应用主题到页面"""
+        if is_dark is None:
+            from installer import is_dark_theme
+            is_dark = is_dark_theme()
+
+        # 页面已经使用QFluentWidgets组件，它们会自动跟随主题
+        # 这里可以添加额外的主题特定样式调整
+        if is_dark:
+            self.setStyleSheet("""
+                Page3 {
+                    background-color: transparent;
+                }
+            """)
+        else:
+            self.setStyleSheet("""
+                Page3 {
+                    background-color: transparent;
+                }
+            """)

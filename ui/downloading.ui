@@ -54,6 +54,9 @@
           <height>10</height>
          </size>
         </property>
+        <property name="value">
+         <number>0</number>
+        </property>
        </widget>
       </item>
      </layout>

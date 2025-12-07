@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
-from PyQt6.QtCore import Qt
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
+from PyQt5.QtCore import Qt
 
 from qfluentwidgets import (SmoothScrollArea, TitleLabel, CardWidget, SubtitleLabel, 
                             CheckBox, PrimaryPushButton)
@@ -90,3 +90,24 @@ class Page2_2(QWidget):
             'create_desktop_shortcut': self.desktop_shortcut_checkbox.isChecked(),
             'create_start_menu_item': self.start_menu_checkbox.isChecked()
         }
+    
+    def apply_theme(self, is_dark=None):
+        """应用主题到页面"""
+        if is_dark is None:
+            from installer import is_dark_theme
+            is_dark = is_dark_theme()
+        
+        # 页面已经使用QFluentWidgets组件，它们会自动跟随主题
+        # 这里可以添加额外的主题特定样式调整
+        if is_dark:
+            self.setStyleSheet("""
+                Page2_2 {
+                    background-color: transparent;
+                }
+            """)
+        else:
+            self.setStyleSheet("""
+                Page2_2 {
+                    background-color: transparent;
+                }
+            """)

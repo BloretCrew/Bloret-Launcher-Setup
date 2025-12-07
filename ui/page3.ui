@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>695</width>
-    <height>714</height>
+    <width>670</width>
+    <height>452</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -44,8 +44,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>677</width>
-        <height>656</height>
+        <width>652</width>
+        <height>550</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -74,19 +74,6 @@
         </layout>
        </item>
        <item>
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
         <widget class="CardWidget" name="CardWidget">
          <property name="minimumSize">
           <size>
@@ -98,7 +85,8 @@
           <item>
            <widget class="SubtitleLabel" name="SubtitleLabel">
             <property name="text">
-             <string>来认识一下 Bloret Launcher / Come and get to know Bloret Launcher</string>
+             <string>来认识一下 Bloret Launcher
+Come and get to know Bloret Launcher</string>
             </property>
            </widget>
           </item>

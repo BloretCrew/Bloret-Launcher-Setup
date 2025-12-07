@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QPixmap, QFont
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap, QFont
 
 from qfluentwidgets import (SmoothScrollArea, StrongBodyLabel, LargeTitleLabel, 
                             SubtitleLabel, BodyLabel, PushButton, PrimaryPushButton)
@@ -48,7 +48,7 @@ class Page1(QWidget):
                 logo_label.setPixmap(pixmap)
         except:
             logo_label.setText("LOGO")
-            logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            logo_label.setAlignment(Qt.AlignCenter)
         
         header_layout.addWidget(logo_label)
         
@@ -117,3 +117,24 @@ class Page1(QWidget):
     def update_version(self, version):
         """更新版本信息显示"""
         self.version_label.setText(version)
+    
+    def apply_theme(self, is_dark=None):
+        """应用主题到页面"""
+        if is_dark is None:
+            from installer import is_dark_theme
+            is_dark = is_dark_theme()
+        
+        # 页面已经使用QFluentWidgets组件，它们会自动跟随主题
+        # 这里可以添加额外的主题特定样式调整
+        if is_dark:
+            self.setStyleSheet("""
+                Page1 {
+                    background-color: transparent;
+                }
+            """)
+        else:
+            self.setStyleSheet("""
+                Page1 {
+                    background-color: transparent;
+                }
+            """)
