@@ -5,9 +5,12 @@ import os
 import time
 import threading
 import logging
+import subprocess
+import tempfile
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer
 from PyQt5.QtGui import QPixmap
+import traceback
 
 from qfluentwidgets import (SmoothScrollArea, TitleLabel, ProgressBar, StrongBodyLabel, 
                             CardWidget, SubtitleLabel, PrimaryPushButton, InfoBar, InfoBarPosition)
@@ -384,16 +387,261 @@ class Page3(QWidget):
             logger.info(f"桌面快捷方式: {create_desktop}")
             logger.info(f"开始菜单快捷方式: {create_start_menu}")
             
-            if install_path:
-                # 这里应该创建实际的快捷方式
-                # 简化版本，仅作为演示
-                pass
+            if not install_path:
+                logger.warning("安装路径为空，无法创建快捷方式")
+                return
                 
-            logger.info(f"快捷方式创建完成")
+            # 查找可执行文件
+            exe_path = self.find_executable_in_install_path(install_path)
+            if not exe_path:
+                logger.error(f"在安装路径 {install_path} 中未找到可执行文件")
+                return
+                
+            logger.info(f"找到可执行文件: {exe_path}")
+            
+            # 获取应用名称（用于快捷方式名称）
+            app_name = self.get_app_name_from_path(exe_path)
+            logger.info(f"应用名称: {app_name}")
+            
+            shortcuts_created = []
+            
+            # 创建桌面快捷方式
+            if create_desktop:
+                desktop_path = self.get_desktop_path()
+                if desktop_path:
+                    shortcut_path = os.path.join(desktop_path, f"{app_name}.lnk")
+                    if self.create_windows_shortcut(exe_path, shortcut_path, app_name):
+                        shortcuts_created.append("桌面快捷方式")
+                        logger.info(f"桌面快捷方式创建成功: {shortcut_path}")
+                    else:
+                        logger.error("桌面快捷方式创建失败")
+                else:
+                    logger.error("无法获取桌面路径")
+            
+            # 创建开始菜单快捷方式
+            if create_start_menu:
+                start_menu_path = self.get_start_menu_path()
+                if start_menu_path:
+                    # 在程序菜单中创建文件夹
+                    app_folder = os.path.join(start_menu_path, app_name)
+                    os.makedirs(app_folder, exist_ok=True)
+                    shortcut_path = os.path.join(app_folder, f"{app_name}.lnk")
+                    if self.create_windows_shortcut(exe_path, shortcut_path, app_name):
+                        shortcuts_created.append("开始菜单快捷方式")
+                        logger.info(f"开始菜单快捷方式创建成功: {shortcut_path}")
+                    else:
+                        logger.error("开始菜单快捷方式创建失败")
+                else:
+                    logger.error("无法获取开始菜单路径")
+            
+            if shortcuts_created:
+                logger.info(f"快捷方式创建完成: {', '.join(shortcuts_created)}")
+            else:
+                logger.warning("未创建任何快捷方式")
                 
         except Exception as e:
             logger.error(f"创建快捷方式失败: {e}")
             logger.error(traceback.format_exc())
+    
+    def find_executable_in_install_path(self, install_path):
+        """在安装路径中查找可执行文件"""
+        try:
+            logger.debug(f"在安装路径中查找可执行文件: {install_path}")
+            
+            # 常见的可执行文件名称
+            common_exe_names = ['Bloret-Launcher.exe', 'Bloret Launcher.exe', 'BloretLauncher.exe', 
+                              'launcher.exe', 'Bloret.exe', 'main.exe']
+            
+            # 首先检查安装路径本身
+            if os.path.isfile(install_path) and install_path.lower().endswith('.exe'):
+                logger.debug(f"安装路径本身就是可执行文件: {install_path}")
+                return install_path
+            
+            # 如果是目录，在其中查找
+            if os.path.isdir(install_path):
+                logger.debug(f"安装路径是目录，在其中查找可执行文件")
+                
+                # 优先查找常见的可执行文件名称
+                for exe_name in common_exe_names:
+                    exe_path = os.path.join(install_path, exe_name)
+                    if os.path.exists(exe_path):
+                        logger.debug(f"找到匹配的可执行文件: {exe_path}")
+                        return exe_path
+                
+                # 如果没找到特定名称的，返回第一个exe文件
+                for root, dirs, files in os.walk(install_path):
+                    for file in files:
+                        if file.lower().endswith('.exe'):
+                            exe_path = os.path.join(root, file)
+                            logger.debug(f"找到可执行文件: {exe_path}")
+                            return exe_path
+            
+            logger.warning(f"在安装路径 {install_path} 中未找到可执行文件")
+            return None
+            
+        except Exception as e:
+            logger.error(f"查找可执行文件失败: {e}")
+            logger.error(traceback.format_exc())
+            return None
+    
+    def get_app_name_from_path(self, exe_path):
+        """从可执行文件路径获取应用名称"""
+        try:
+            # 从文件名获取名称（不含扩展名）
+            base_name = os.path.splitext(os.path.basename(exe_path))[0]
+            
+            # 如果是Bloret相关的，返回Bloret Launcher
+            if 'bloret' in base_name.lower():
+                return "Bloret Launcher"
+            
+            # 否则返回格式化后的名称
+            return base_name.replace('-', ' ').replace('_', ' ').title()
+            
+        except Exception as e:
+            logger.error(f"获取应用名称失败: {e}")
+            return "Application"
+    
+    def get_desktop_path(self):
+        """获取桌面路径"""
+        try:
+            import winreg
+            
+            # 通过注册表获取桌面路径
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, 
+                               r"Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders")
+            desktop_path = winreg.QueryValueEx(key, "Desktop")[0]
+            winreg.CloseKey(key)
+            
+            logger.debug(f"桌面路径: {desktop_path}")
+            return desktop_path
+            
+        except Exception as e:
+            logger.error(f"获取桌面路径失败: {e}")
+            #  fallback到常见路径
+            try:
+                desktop_path = os.path.join(os.environ['USERPROFILE'], 'Desktop')
+                if os.path.exists(desktop_path):
+                    return desktop_path
+                else:
+                    # 尝试中文桌面路径
+                    desktop_path = os.path.join(os.environ['USERPROFILE'], '桌面')
+                    if os.path.exists(desktop_path):
+                        return desktop_path
+            except Exception as e2:
+                logger.error(f"fallback获取桌面路径失败: {e2}")
+            return None
+    
+    def get_start_menu_path(self):
+        """获取开始菜单路径"""
+        try:
+            import winreg
+            
+            # 通过注册表获取开始菜单路径
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, 
+                               r"Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders")
+            start_menu_path = winreg.QueryValueEx(key, "Programs")[0]
+            winreg.CloseKey(key)
+            
+            logger.debug(f"开始菜单路径: {start_menu_path}")
+            return start_menu_path
+            
+        except Exception as e:
+            logger.error(f"获取开始菜单路径失败: {e}")
+            # fallback到常见路径
+            try:
+                start_menu_path = os.path.join(os.environ['APPDATA'], 'Microsoft', 'Windows', 'Start Menu', 'Programs')
+                if os.path.exists(start_menu_path):
+                    return start_menu_path
+            except Exception as e2:
+                logger.error(f"fallback获取开始菜单路径失败: {e2}")
+            return None
+    
+    def create_windows_shortcut(self, target_path, shortcut_path, description=""):
+        """创建Windows快捷方式"""
+        try:
+            logger.debug(f"创建快捷方式: 目标={target_path}, 路径={shortcut_path}, 描述={description}")
+            
+            # 使用Windows Script Host创建快捷方式
+            import win32com.client
+            
+            shell = win32com.client.Dispatch('WScript.Shell')
+            shortcut = shell.CreateShortCut(shortcut_path)
+            shortcut.Targetpath = target_path
+            shortcut.WorkingDirectory = os.path.dirname(target_path)
+            shortcut.IconLocation = target_path
+            if description:
+                shortcut.Description = description
+            shortcut.save()
+            
+            logger.debug(f"快捷方式创建成功: {shortcut_path}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"创建快捷方式失败: {e}")
+            
+            # 如果win32com不可用，尝试使用简单的批处理文件方法
+            try:
+                logger.debug("尝试使用批处理方法创建快捷方式")
+                return self.create_shortcut_with_bat(target_path, shortcut_path, description)
+            except Exception as e2:
+                logger.error(f"批处理方法也失败: {e2}")
+                return False
+    
+    def create_shortcut_with_bat(self, target_path, shortcut_path, description=""):
+        """使用批处理文件方法创建快捷方式（备用方案）"""
+        try:
+            # 创建临时批处理文件来创建快捷方式
+            bat_content = f"""
+@echo off
+setlocal enabledelayedexpansion
+set "target={target_path}"
+set "shortcut={shortcut_path}"
+set "desc={description}"
+
+if not exist "%target%" (
+    echo 目标文件不存在: %target%
+    exit /b 1
+)
+
+powershell -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('%shortcut%'); $s.TargetPath = '%target%'; $s.WorkingDirectory = Split-Path -Parent '%target%'; $s.IconLocation = '%target%'; $s.Description = '%desc%'; $s.Save()"
+
+if %errorlevel% equ 0 (
+    echo 快捷方式创建成功
+    exit /b 0
+) else (
+    echo 快捷方式创建失败
+    exit /b 1
+)
+"""
+            
+            # 创建临时批处理文件
+            import tempfile
+            bat_file = tempfile.NamedTemporaryFile(mode='w', suffix='.bat', delete=False)
+            bat_file.write(bat_content)
+            bat_file.close()
+            
+            try:
+                # 执行批处理文件
+                result = subprocess.run([bat_file.name], capture_output=True, text=True, timeout=30)
+                success = result.returncode == 0
+                
+                if success:
+                    logger.debug(f"批处理方法创建快捷方式成功: {shortcut_path}")
+                else:
+                    logger.error(f"批处理方法创建快捷方式失败: {result.stderr}")
+                
+                return success
+                
+            finally:
+                # 清理临时批处理文件
+                try:
+                    os.unlink(bat_file.name)
+                except:
+                    pass
+                    
+        except Exception as e:
+            logger.error(f"批处理方法创建快捷方式失败: {e}")
+            return False
             
     def update_progress(self, value):
         """更新进度条"""

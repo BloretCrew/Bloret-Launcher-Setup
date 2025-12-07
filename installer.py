@@ -12,7 +12,7 @@ import time
 from pathlib import Path
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QWidget, 
                            QStackedWidget, QHBoxLayout, QLabel)
-from PyQt5.QtCore import Qt, QPropertyAnimation, QRect, pyqtSignal, QThread, QObject
+from PyQt5.QtCore import Qt, QPropertyAnimation, QRect, pyqtSignal, QThread, QObject, QTimer
 from PyQt5.QtGui import QIcon, QPixmap, QFont, QColor, QPalette
 from PyQt5 import uic
 import ctypes
@@ -132,8 +132,9 @@ class NetworkWorker(QObject):
             downloaded = 0
             
             last_progress = -1
+            last_update_time = time.time()
             with open(self.temp_file_path, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=32768):  # 增加块大小到32KB
+                for chunk in response.iter_content(chunk_size=16384):  # 减小块大小到16KB，增加更新频率
                     if chunk:
                         f.write(chunk)
                         downloaded += len(chunk)
@@ -141,21 +142,25 @@ class NetworkWorker(QObject):
                             progress = int((downloaded / total_size) * 100)
                             # 确保进度不超过100
                             progress = min(progress, 100)
-                            # 只在进度有变化时才更新
-                            if progress != last_progress:
+                            current_time = time.time()
+                            # 只在进度有变化且间隔超过50ms时才更新，避免过于频繁
+                            if progress != last_progress and (current_time - last_update_time) > 0.05:
                                 logger.debug(f"下载进度: {progress}% ({downloaded}/{total_size} bytes)")
                                 self.download_progress.emit(progress)
                                 last_progress = progress
-                                # 只在进度变化时添加很小的延迟让UI刷新
-                                time.sleep(0.001)  # 1毫秒延迟
+                                last_update_time = current_time
+                                # 添加稍微长一点的延迟让UI有足够时间刷新
+                                time.sleep(0.01)  # 10毫秒延迟
                         else:
                             # 如果无法获取总大小，使用模拟进度
-                            if downloaded % (1024 * 1024) == 0:  # 每MB更新一次
+                            if downloaded % (512 * 1024) == 0:  # 每512KB更新一次，更频繁
                                 simulated_progress = min(int((downloaded / (50 * 1024 * 1024)) * 100), 95)  # 假设50MB文件
-                                if simulated_progress != last_progress:
+                                current_time = time.time()
+                                if simulated_progress != last_progress and (current_time - last_update_time) > 0.05:
                                     logger.debug(f"模拟下载进度: {simulated_progress}% ({downloaded} bytes)")
                                     self.download_progress.emit(simulated_progress)
                                     last_progress = simulated_progress
+                                    last_update_time = current_time
             
             logger.info(f"文件下载完成: {self.temp_file_path}")
             self.download_complete.emit(self.temp_file_path)
@@ -434,9 +439,27 @@ class BloretInstaller(QMainWindow):
         
     def on_quick_install(self):
         """快速安装"""
+        logger.info("快速安装按钮被点击")
         self.install_config['installation_type'] = 'quick'
         self.install_config['install_path'] = os.path.expandvars(r'%APPDATA%\Bloret-Launcher\Bloret-Launcher')
-        self.stacked_widget.setCurrentWidget(self.page2_2)
+        self.install_config['create_desktop_shortcut'] = True
+        self.install_config['create_start_menu_item'] = True
+        
+        logger.info(f"快速安装配置: {self.install_config}")
+        logger.info("直接跳转到安装页面")
+        
+        # 直接跳转到page3开始下载和安装
+        self.stacked_widget.setCurrentWidget(self.page3)
+        
+        # 开始下载和安装流程
+        if self.install_config['download_url']:
+            # 如果有下载链接，先下载再安装
+            logger.info("开始下载流程")
+            self.start_download()
+        else:
+            # 如果没有下载链接，直接模拟安装
+            logger.info("没有下载链接，直接开始安装流程")
+            self.start_installation()
         
     def on_custom_installation(self):
         """自定义安装"""
@@ -623,8 +646,33 @@ class BloretInstaller(QMainWindow):
                 
                 # 设置初始值
                 if self.download_progress_bar:
-                    self.download_progress_bar.setValue(0)
-                    logger.info("设置进度条初始值为0")
+                    # 首先尝试设置进度条的范围 - QFluentWidgets ProgressBar可能需要特殊处理
+                    try:
+                        # 尝试标准QProgressBar的setRange方法
+                        if hasattr(self.download_progress_bar, 'setRange'):
+                            self.download_progress_bar.setRange(0, 100)
+                            logger.info("设置进度条范围: 0-100 (setRange)")
+                        # 尝试设置最小值和最大值
+                        elif hasattr(self.download_progress_bar, 'setMinimum') and hasattr(self.download_progress_bar, 'setMaximum'):
+                            self.download_progress_bar.setMinimum(0)
+                            self.download_progress_bar.setMaximum(100)
+                            logger.info("设置进度条范围: 0-100 (setMinimum/setMaximum)")
+                        else:
+                            logger.info("QFluentWidgets ProgressBar可能使用默认范围0-100")
+                    except Exception as e:
+                        logger.info(f"设置进度条范围时出错（可能不需要）: {e}")
+                    
+                    # 设置进度值
+                    if hasattr(self.download_progress_bar, 'setValue'):
+                        self.download_progress_bar.setValue(0)
+                        logger.info("使用setValue设置初始值")
+                    elif hasattr(self.download_progress_bar, 'setProgress'):
+                        self.download_progress_bar.setProgress(0)
+                        logger.info("使用setProgress设置初始值")
+                    else:
+                        self.download_progress_bar.value = 0
+                        logger.info("直接设置value属性")
+                        
                 if self.download_progress_label:
                     self.download_progress_label.setText("0%")
                     logger.info("设置标签初始文本为0%")
@@ -673,6 +721,21 @@ class BloretInstaller(QMainWindow):
                 # 进度条
                 self.download_progress_bar = ProgressBar()
                 self.download_progress_bar.setMinimumSize(0, 10)
+                
+                # 设置进度条范围
+                try:
+                    if hasattr(self.download_progress_bar, 'setRange'):
+                        self.download_progress_bar.setRange(0, 100)
+                        logger.info("设置进度条范围: 0-100 (使用setRange)")
+                    elif hasattr(self.download_progress_bar, 'setMinimum') and hasattr(self.download_progress_bar, 'setMaximum'):
+                        self.download_progress_bar.setMinimum(0)
+                        self.download_progress_bar.setMaximum(100)
+                        logger.info("设置进度条范围: 0-100 (使用setMinimum/setMaximum)")
+                    else:
+                        logger.info("进度条默认范围: 0-100")
+                except Exception as e:
+                    logger.warning(f"设置进度条范围失败: {e}")
+                
                 self.download_progress_bar.setValue(0)
                 card_layout.addWidget(self.download_progress_bar)
                 
@@ -734,6 +797,14 @@ class BloretInstaller(QMainWindow):
             # 进度条
             self.download_progress_bar = QProgressBar()
             self.download_progress_bar.setMinimumSize(0, 10)
+            
+            # 设置进度条范围
+            try:
+                self.download_progress_bar.setRange(0, 100)
+                logger.info("设置进度条范围: 0-100 (标准QProgressBar)")
+            except Exception as e:
+                logger.warning(f"设置进度条范围失败: {e}")
+            
             self.download_progress_bar.setValue(0)
             card_layout.addWidget(self.download_progress_bar)
             
@@ -781,21 +852,60 @@ class BloretInstaller(QMainWindow):
                 except Exception as e:
                     logger.error(f"更新标签文本失败: {e}")
             
-            # 强制刷新UI
+            # 强制刷新UI - 使用多种方法确保界面更新
             try:
                 if self.downloading_dialog:
+                    # 方法1: 重绘对话框
                     self.downloading_dialog.repaint()
+                    
+                    # 方法2: 处理所有事件
                     QApplication.processEvents()
+                    
+                    # 方法3: 专门更新进度条
+                    if self.download_progress_bar:
+                        self.download_progress_bar.update()
+                        self.download_progress_bar.repaint()
+                    
+                    # 方法4: 更新标签
+                    if self.download_progress_label:
+                        self.download_progress_label.update()
+                        self.download_progress_label.repaint()
+                    
+                    # 方法5: 延迟一小段时间让UI线程处理
+                    QTimer.singleShot(10, lambda: None)  # 10毫秒延迟
+                    
                     logger.debug("UI强制刷新完成")
             except Exception as e:
                 logger.error(f"UI刷新失败: {e}")
         else:
             logger.warning(f"无法更新进度: downloading_dialog={self.downloading_dialog}, 进度条存在={hasattr(self, 'download_progress_bar')}")
+        
+        # 启动定期刷新机制，确保进度条持续更新
+        if not hasattr(self, 'refresh_timer') or not self.refresh_timer:
+            self.refresh_timer = QTimer()
+            self.refresh_timer.timeout.connect(self.refresh_download_dialog)
+            self.refresh_timer.start(100)  # 每100ms刷新一次
+
+    def refresh_download_dialog(self):
+        """定期刷新下载对话框"""
+        try:
+            if hasattr(self, 'downloading_dialog') and self.downloading_dialog:
+                # 强制刷新整个对话框
+                self.downloading_dialog.repaint()
+                self.downloading_dialog.update()
+                QApplication.processEvents()
+        except Exception as e:
+            logger.debug(f"刷新下载对话框时出错: {e}")
     
     def on_download_complete(self, file_path):
         """下载完成"""
         logger.info(f"下载完成: {file_path}")
         self.install_config['downloaded_file'] = file_path
+        
+        # 停止定时刷新
+        if hasattr(self, 'refresh_timer') and self.refresh_timer:
+            self.refresh_timer.stop()
+            self.refresh_timer = None
         
         # 隐藏下载进度窗口
         if self.downloading_dialog:
