@@ -18,9 +18,9 @@ jobs:
 
     steps:
     - name: 检出最新版本
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
-        ref: 'Windows'
+        ref: 'main'
 
     - name: 验证安装向导资源文件路径
       run: |
@@ -36,7 +36,7 @@ jobs:
       shell: pwsh
 
     - name: 设置 Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
@@ -118,9 +118,9 @@ jobs:
 
     steps:
     - name: 检出最新版本
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
-        ref: 'Windows'
+        ref: 'main'
 
     - name: 创建输出目录并清理
       run: |

@@ -115,8 +115,6 @@ jobs:
     steps:
     - name: 检出最新版本
       uses: actions/checkout@v4
-      with:
-        ref: 'main'
 
     - name: 创建输出目录并清理
       run: |
@@ -184,8 +182,6 @@ jobs:
   #   steps:
   #   - name: 检出最新版本
   #     uses: actions/checkout@v2
-  #     with:
-  #       ref: 'main'
   #   - name: 验证资源文件路径
   #     run: |
   #       ls -alh .
