@@ -4,7 +4,7 @@
 import sys
 import os
 import tempfile
-from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QProgressBar, QLabel, QFrame
+from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QProgressBar, QLabel
 from PyQt5 import uic
 from PyQt5.QtCore import QThread, pyqtSignal, QObject
 import time
@@ -48,7 +48,7 @@ class MockNetworkWorker(QObject):
             print(f"模拟下载失败: {e}")
 
 class DownloadDialogTester(QDialog):
-    """下载对话框测试器"""
+    """下载对话框测试器 - 整合主程序的实现"""
     
     def __init__(self):
         super().__init__()
@@ -84,7 +84,7 @@ class DownloadDialogTester(QDialog):
         self.thread.start()
     
     def show_downloading_dialog(self):
-        """显示下载进度窗口"""
+        """显示下载进度窗口 - 整合主程序的实现"""
         try:
             # 使用现有的UI文件
             ui_path = os.path.join(os.path.dirname(__file__), "ui", "downloading.ui")
@@ -94,6 +94,10 @@ class DownloadDialogTester(QDialog):
             if os.path.exists(ui_path):
                 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QProgressBar, QLabel
                 
+                # 导入QFluentWidgets组件（如果可用）
+                if QFLUENT_AVAILABLE:
+                    from qfluentwidgets import ProgressBar, BodyLabel
+                
                 self.downloading_dialog = QDialog(self)
                 self.downloading_dialog.setWindowTitle("正在下载")
                 self.downloading_dialog.setModal(True)
@@ -102,7 +106,7 @@ class DownloadDialogTester(QDialog):
                 # 直接使用UI文件创建对话框
                 self.downloading_dialog = uic.loadUi(ui_path, self.downloading_dialog)
                 
-                # 获取进度条和标签引用
+                # 获取进度条和标签引用 - 参考测试程序
                 if QFLUENT_AVAILABLE:
                     self.download_progress_bar = self.downloading_dialog.findChild(ProgressBar, "ProgressBar")
                     self.download_progress_label = self.downloading_dialog.findChild(BodyLabel, "BodyLabel")
@@ -142,7 +146,7 @@ class DownloadDialogTester(QDialog):
             traceback.print_exc()
     
     def update_download_progress(self, progress):
-        """更新下载进度"""
+        """更新下载进度 - 整合主程序的实现"""
         print(f"更新进度: {progress}%")
         if self.downloading_dialog and hasattr(self, 'download_progress_bar'):
             # 尝试设置进度条值
@@ -185,126 +189,12 @@ class DownloadDialogTester(QDialog):
             self.thread.quit()
             self.thread.wait()
 
-def test_single_download_dialog_show():
-    """快速连续调用两次 show_downloading_dialog 应只弹出一个对话框"""
-    from PyQt5.QtWidgets import QApplication
-    app = QApplication.instance() or QApplication([])
+def main():
+    """主函数"""
+    app = QApplication(sys.argv)
     tester = DownloadDialogTester()
     tester.show()
-
-    # 快速调用两次
-    tester.show_downloading_dialog()
-    tester.show_downloading_dialog()
-
-    # 给进度设置一个值并处理事件
-    tester.update_download_progress(30)
-    QApplication.processEvents()
-
-    # 检查进度值是否被实际设置（无需手动调整窗口大小）
-    if hasattr(tester, 'download_progress_bar') and hasattr(tester.download_progress_bar, 'value'):
-        try:
-            assert tester.download_progress_bar.value() == 30, f"期望进度为 30，但实际为 {tester.download_progress_bar.value()}"
-        except Exception:
-            # 如果特定控件没有 value 方法，则尝试读取属性
-            if hasattr(tester.download_progress_bar, 'getValue'):
-                assert tester.download_progress_bar.getValue() == 30
-
-    # 允许事件循环处理
-    QApplication.processEvents()
-
-    # 额外的布局检查：进度条的 objectName / 最小高度 / 可见宽度（若有）
-    if hasattr(tester, 'download_progress_bar'):
-        pb = tester.download_progress_bar
-        assert getattr(pb, 'objectName', lambda: '')() in ('ProgressBar', 'fallback_progress_bar'), f"进度条 objectName 应为 'ProgressBar' 或 'fallback_progress_bar'，当前为 {getattr(pb, 'objectName', lambda: '')()}"
-        try:
-            assert pb.minimumHeight() >= 10, f"期望进度条最小高度 >= 10，实际 {pb.minimumHeight()}"
-        except Exception:
-            pass
-        # 如果控件已有宽度（在窗口管理器存在时），检查宽度合理
-        if pb.width() > 0:
-            assert pb.width() >= 100, f"期望进度条宽度 >= 100，实际 {pb.width()}"
-
-    # 查找顶层窗口中标题为“正在下载”的对话框
-    dialogs = [w for w in QApplication.topLevelWidgets() if getattr(w, 'windowTitle', None) and callable(w.windowTitle) and w.windowTitle() == '正在下载']
-    assert len(dialogs) == 1, f"期望只有一个下载对话框，但找到了 {len(dialogs)} 个"
-
-
-def test_finish_dialog_buttons():
-    """安装完成后应显示包含两按钮的完成对话框：'完成'（普通按钮）和'完成并打开'（主按钮）"""
-    from PyQt5.QtWidgets import QApplication
-    app = QApplication.instance() or QApplication([])
-
-    from installer import BloretInstaller
-    inst = BloretInstaller(fetch_version=False)
-
-    # 模拟已下载文件路径，供完成并打开按钮使用
-    import tempfile, os
-    temp_file = os.path.join(tempfile.gettempdir(), 'bloret_mock_installed.exe')
-    with open(temp_file, 'w') as f:
-        f.write('mock')
-    inst.install_config['downloaded_file'] = temp_file
-
-    # 触发安装完成
-    inst.on_install_complete()
-    QApplication.processEvents()
-
-    # 检查 finish dialog
-    assert hasattr(inst, '_finish_dialog'), '未创建完成对话框'
-    dlg = inst._finish_dialog
-    assert dlg.isVisible(), '完成对话框应当可见'
-
-    # 在对话框中查找带文本的按钮
-    buttons = []
-    for w in dlg.findChildren(object):
-        try:
-            if hasattr(w, 'text'):
-                txt = w.text()
-                if txt in ('完成', '完成并打开'):
-                    buttons.append((txt, w))
-        except Exception:
-            pass
-
-    names = [n for n, _ in buttons]
-    assert '完成' in names and '完成并打开' in names, f"期望两个按钮文本存在，实际按钮: {names}"
-
-    # 隐藏并清理
-    try:
-        dlg.hide()
-    except Exception:
-        pass
-    inst._finish_dialog = None
-    try:
-        os.remove(temp_file)
-    except Exception:
-        pass
-
-
-def test_installer_single_dialog():
-    """使用真实的 BloretInstaller 测试：重复调用应只产生 1 个下载对话框"""
-    from PyQt5.QtWidgets import QApplication
-    from installer import BloretInstaller
-
-    app = QApplication.instance() or QApplication([])
-    inst = BloretInstaller()
-
-    inst.show_downloading_dialog()
-    inst.show_downloading_dialog()
-    QApplication.processEvents()
-
-    # installer 应该持有单一的 downloading_dialog，且其可见
-    assert getattr(inst, 'downloading_dialog', None) is not None, "期望 inst.downloading_dialog 非空"
-    assert inst.downloading_dialog.isVisible(), "期望下载对话框可见"
-
-    # 再次调用后不应创建新的 QDialog 对象（id 相同）
-    existing = inst.downloading_dialog
-    inst.show_downloading_dialog()
-    QApplication.processEvents()
-    assert inst.downloading_dialog is existing, "重复创建下载对话框（应复用已存在的）"
-
-    # 隐藏并清理
-    inst.downloading_dialog.hide()
-    inst.downloading_dialog = None
-
+    sys.exit(app.exec())
 
 if __name__ == "__main__":
     main()

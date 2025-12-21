@@ -16,6 +16,7 @@ from PyQt5.QtCore import Qt, QPropertyAnimation, QRect, pyqtSignal, QThread, QOb
 from PyQt5.QtGui import QIcon, QPixmap, QFont, QColor, QPalette
 from PyQt5 import uic
 import ctypes
+import traceback
 
 # 配置日志
 logging.basicConfig(
@@ -93,7 +94,7 @@ except ImportError:
 
 
 class NetworkWorker(QObject):
-    """网络请求工作线程"""
+    """网络请求工作线程 - 整合测试程序的成功实现"""
     info_received = pyqtSignal(dict)
     download_progress = pyqtSignal(int)
     download_complete = pyqtSignal(str)
@@ -117,7 +118,7 @@ class NetworkWorker(QObject):
             self.error_occurred.emit(f"获取版本信息失败: {str(e)}")
     
     def download_file(self, url, filename):
-        """下载文件"""
+        """下载文件 - 整合测试程序的成功实现"""
         logger.info(f"开始下载文件: {url} -> {filename}")
         try:
             temp_dir = tempfile.gettempdir()
@@ -143,21 +144,24 @@ class NetworkWorker(QObject):
                             # 确保进度不超过100
                             progress = min(progress, 100)
                             current_time = time.time()
-                            # 只在进度有变化且间隔超过50ms时才更新，避免过于频繁
-                            if progress != last_progress and (current_time - last_update_time) > 0.05:
-                                logger.debug(f"下载进度: {progress}% ({downloaded}/{total_size} bytes)")
+                            # 只在进度有变化且间隔超过100ms时才更新，避免过于频繁
+                            if progress != last_progress and (current_time - last_update_time) > 0.1:
+                                # 减少日志频率，只在关键进度点记录
+                                if progress % 10 == 0:
+                                    logger.debug(f"下载进度: {progress}%")
                                 self.download_progress.emit(progress)
                                 last_progress = progress
                                 last_update_time = current_time
-                                # 添加稍微长一点的延迟让UI有足够时间刷新
-                                time.sleep(0.01)  # 10毫秒延迟
+                                # 不再添加延迟，让下载更流畅
                         else:
                             # 如果无法获取总大小，使用模拟进度
                             if downloaded % (512 * 1024) == 0:  # 每512KB更新一次，更频繁
                                 simulated_progress = min(int((downloaded / (50 * 1024 * 1024)) * 100), 95)  # 假设50MB文件
                                 current_time = time.time()
-                                if simulated_progress != last_progress and (current_time - last_update_time) > 0.05:
-                                    logger.debug(f"模拟下载进度: {simulated_progress}% ({downloaded} bytes)")
+                                if simulated_progress != last_progress and (current_time - last_update_time) > 0.1:
+                                    # 减少日志频率，只在关键进度点记录
+                                    if simulated_progress % 10 == 0:
+                                        logger.debug(f"模拟下载进度: {simulated_progress}%")
                                     self.download_progress.emit(simulated_progress)
                                     last_progress = simulated_progress
                                     last_update_time = current_time
@@ -337,7 +341,7 @@ def apply_theme(self, is_dark=None):
         app.setPalette(app.style().standardPalette())
 
 class BloretInstaller(QMainWindow):
-    def __init__(self):
+    def __init__(self, fetch_version=True):
         super().__init__()
         
         # 设置窗口属性
@@ -360,7 +364,7 @@ class BloretInstaller(QMainWindow):
         except:
             pass
             
-        self.resize(670, 452)
+        self.resize(700, 452)
         
         # 安装配置
         self.install_config = {
@@ -377,12 +381,16 @@ class BloretInstaller(QMainWindow):
         self.network_thread = None
         self.network_worker = None
         self.downloading_dialog = None
+        # 用于防止并发创建下载对话框
+        import threading as _threading
+        self._downloading_dialog_lock = _threading.Lock()
         
         # 初始化 UI
         self.initUI()
         
-        # 启动时获取版本信息
-        self.fetch_version_info()
+        # 启动时获取版本信息（测试时可传入 fetch_version=False 以避免网络线程）
+        if fetch_version:
+            self.fetch_version_info()
         
     def initUI(self):
         # 创建中央窗口和主布局
@@ -554,11 +562,20 @@ class BloretInstaller(QMainWindow):
         self.cleanup_network_thread()
     
     def start_download(self):
-        """开始下载"""
+        """开始下载 - 整合测试程序的成功实现"""
         logger.info("开始下载流程")
+        # 防止重复触发下载流程
+        if getattr(self, '_download_starting', False):
+            logger.info('下载流程已在启动中，跳过重复调用')
+            return
+        self._download_starting = True
         if not self.install_config['download_url']:
             logger.error("下载链接无效")
             self.show_error("下载链接无效")
+            try:
+                self._download_starting = False
+            except Exception:
+                pass
             return
         
         logger.info(f"下载URL: {self.install_config['download_url']}")
@@ -567,14 +584,20 @@ class BloretInstaller(QMainWindow):
         logger.info("显示下载进度窗口")
         self.show_downloading_dialog()
         
-        # 创建网络工作线程
+        # 确保对话框完全显示后再启动线程 - 参考测试程序
+        from PyQt5.QtWidgets import QApplication
+        QApplication.processEvents()
+        time.sleep(0.1)  # 给UI一点时间完全初始化
+        QApplication.processEvents()
+        
+        # 创建网络工作线程 - 参考测试程序
         logger.info("创建网络工作线程")
         self.network_thread = QThread()
         self.network_worker = NetworkWorker()
         self.network_worker.moveToThread(self.network_thread)
         logger.info("网络工作对象已移动到线程")
         
-        # 连接信号
+        # 连接信号 - 参考测试程序
         logger.info("连接网络线程信号")
         self.network_thread.started.connect(lambda: self.network_worker.download_file(
             self.install_config['download_url'], 
@@ -585,15 +608,53 @@ class BloretInstaller(QMainWindow):
         self.network_worker.error_occurred.connect(self.on_download_error)
         logger.info("信号连接完成")
         
-        # 启动线程
+        # 启动线程 - 参考测试程序
         logger.info("启动网络线程")
         self.network_thread.start()
         logger.info("网络线程已启动")
+        # 允许后续的下载启动（仅阻止创建阶段的并发）
+        try:
+            self._download_starting = False
+        except Exception:
+            pass
     
     def show_downloading_dialog(self):
-        """显示下载进度窗口"""
+        """显示下载进度窗口 - 整合测试程序的成功实现"""
         logger.info("开始显示下载进度窗口")
+        # 如果已经存在正在显示的下载对话框或正在创建中，则直接返回（避免重复弹窗）
         try:
+            logger.debug("show_downloading_dialog 调用堆栈:\n%s", ''.join(traceback.format_stack(limit=10)))
+            # 使用锁序列化对话框创建，避免并发创建
+            with self._downloading_dialog_lock:
+                if getattr(self, '_downloading_dialog_opening', False):
+                    logger.info("下载对话框正在创建，跳过重复创建")
+                    return
+                if getattr(self, 'downloading_dialog', None) is not None and self.downloading_dialog.isVisible():
+                    logger.info("下载对话框已存在并可见，跳过创建")
+                    return
+                # 标记正在创建，防止并发创建两个对话框
+                self._downloading_dialog_opening = True
+        except Exception:
+            # 如果检查可见性失败，继续创建新的对话框
+            logger.exception('检查现有对话框时出错，继续创建新的对话框')
+        try:
+            # 在创建新对话框前，再次扫描顶层窗口以尝试复用已存在的下载对话框（防止外部触发重复创建）
+            try:
+                from PyQt5.QtWidgets import QApplication
+                for w in QApplication.topLevelWidgets():
+                    try:
+                        if getattr(w, 'windowTitle', None) and callable(w.windowTitle) and w.windowTitle() == "正在下载":
+                            logger.info("发现现存的下载对话框，复用该对话框")
+                            self.downloading_dialog = w
+                            if not self.downloading_dialog.isVisible():
+                                self.downloading_dialog.show()
+                                QApplication.processEvents()
+                            return
+                    except Exception:
+                        continue
+            except Exception:
+                logger.exception('扫描顶层窗口以复用对话框时出错')
+
             # 使用现有的UI文件
             ui_path = os.path.join(os.path.dirname(__file__), "ui", "downloading.ui")
             logger.info(f"UI文件路径: {ui_path}")
@@ -602,143 +663,219 @@ class BloretInstaller(QMainWindow):
             if os.path.exists(ui_path):
                 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QProgressBar, QLabel
                 
+                # 导入QFluentWidgets组件（如果可用）
+                if QFLUENT_AVAILABLE:
+                    from qfluentwidgets import ProgressBar, BodyLabel
+                
                 self.downloading_dialog = QDialog(self)
                 self.downloading_dialog.setWindowTitle("正在下载")
                 self.downloading_dialog.setModal(True)
                 self.downloading_dialog.resize(400, 182)
-                
-                # 设置对话框样式
-                self.downloading_dialog.setStyleSheet("""
-                    QDialog {
-                        background-color: #ffffff;
-                    }
-                """)
                 
                 # 直接使用UI文件创建对话框
                 self.downloading_dialog = uic.loadUi(ui_path, self.downloading_dialog)
                 
-                # 获取进度条和标签引用
-                self.download_progress_bar = self.downloading_dialog.findChild(QProgressBar, "ProgressBar")
-                self.download_progress_label = self.downloading_dialog.findChild(QLabel, "BodyLabel")
-                logger.info(f"初始查找 - QProgressBar: {self.download_progress_bar}, QLabel: {self.download_progress_label}")
-                
-                # 如果找不到QProgressBar类型的进度条，尝试查找QFluentWidgets的ProgressBar
-                if not self.download_progress_bar:
-                    try:
-                        from qfluentwidgets import ProgressBar
-                        self.download_progress_bar = self.downloading_dialog.findChild(ProgressBar, "ProgressBar")
-                        logger.info(f"使用QFluentWidgets ProgressBar: {self.download_progress_bar}")
-                    except ImportError:
-                        logger.warning("QFluentWidgets ProgressBar导入失败")
+                # 获取进度条和标签引用 - 参考测试程序
+                # 为了可靠刷新，优先使用 PyQt5 的 QProgressBar/QLabel，替换掉 QFluentWidgets 的组件
+                if QFLUENT_AVAILABLE:
+                    # 先尝试找到 QFluentWidgets 的控件
+                    fluent_pb = self.downloading_dialog.findChild(ProgressBar, "ProgressBar")
+                    fluent_lbl = self.downloading_dialog.findChild(BodyLabel, "BodyLabel")
+                    from PyQt5.QtWidgets import QProgressBar, QLabel
+                    if fluent_pb is not None:
+                        try:
+                            parent = fluent_pb.parent()
+                            new_pb = QProgressBar(parent)
+                            new_pb.setObjectName('ProgressBar')
+                            new_pb.setRange(0, 100)
+                            new_pb.setValue(0)
+                            # 插入到父布局中，尽量保持位置
+                            playout = parent.layout() if parent is not None else None
+                            if playout is not None:
+                                idx = playout.indexOf(fluent_pb)
+                                playout.insertWidget(idx, new_pb)
+                            fluent_pb.hide()
+                            self.download_progress_bar = new_pb
+                        except Exception:
+                            logger.exception('替换 QFluent ProgressBar 失败，使用原始控件')
+                            self.download_progress_bar = fluent_pb
+                    else:
+                        # 没找到 fluent pb，尝试找标准控件
+                        self.download_progress_bar = self.downloading_dialog.findChild(QProgressBar, "ProgressBar")
+
+                    if fluent_lbl is not None:
+                        try:
+                            parent = fluent_lbl.parent()
+                            new_lbl = QLabel(parent)
+                            new_lbl.setObjectName('BodyLabel')
+                            new_lbl.setText('0%')
+                            playout = parent.layout() if parent is not None else None
+                            if playout is not None:
+                                idx = playout.indexOf(fluent_lbl)
+                                playout.insertWidget(idx + 1, new_lbl)
+                            fluent_lbl.hide()
+                            self.download_progress_label = new_lbl
+                        except Exception:
+                            logger.exception('替换 QFluent BodyLabel 失败，使用原始控件')
+                            self.download_progress_label = fluent_lbl
+                    else:
+                        self.download_progress_label = self.downloading_dialog.findChild(QLabel, "BodyLabel")
                 else:
-                    logger.info(f"使用标准QProgressBar: {self.download_progress_bar}")
+                    self.download_progress_bar = self.downloading_dialog.findChild(QProgressBar, "ProgressBar")
+                    self.download_progress_label = self.downloading_dialog.findChild(QLabel, "BodyLabel")
                 
-                # 如果找不到QLabel类型的标签，尝试查找QFluentWidgets的BodyLabel
-                if not self.download_progress_label:
-                    try:
-                        from qfluentwidgets import BodyLabel
-                        self.download_progress_label = self.downloading_dialog.findChild(BodyLabel, "BodyLabel")
-                        logger.info(f"使用QFluentWidgets BodyLabel: {self.download_progress_label}")
-                    except ImportError:
-                        logger.warning("QFluentWidgets BodyLabel导入失败")
-                else:
-                    logger.info(f"使用标准QLabel: {self.download_progress_label}")
+                logger.info(f"进度条: {self.download_progress_bar}")
+                logger.info(f"标签: {self.download_progress_label}")
                 
                 # 设置初始值
                 if self.download_progress_bar:
-                    # 首先尝试设置进度条的范围 - QFluentWidgets ProgressBar可能需要特殊处理
                     try:
-                        # 尝试标准QProgressBar的setRange方法
-                        if hasattr(self.download_progress_bar, 'setRange'):
-                            self.download_progress_bar.setRange(0, 100)
-                            logger.info("设置进度条范围: 0-100 (setRange)")
-                        # 尝试设置最小值和最大值
-                        elif hasattr(self.download_progress_bar, 'setMinimum') and hasattr(self.download_progress_bar, 'setMaximum'):
-                            self.download_progress_bar.setMinimum(0)
-                            self.download_progress_bar.setMaximum(100)
-                            logger.info("设置进度条范围: 0-100 (setMinimum/setMaximum)")
-                        else:
-                            logger.info("QFluentWidgets ProgressBar可能使用默认范围0-100")
-                    except Exception as e:
-                        logger.info(f"设置进度条范围时出错（可能不需要）: {e}")
-                    
-                    # 设置进度值
-                    if hasattr(self.download_progress_bar, 'setValue'):
+                        self.download_progress_bar.setRange(0, 100)
                         self.download_progress_bar.setValue(0)
-                        logger.info("使用setValue设置初始值")
-                    elif hasattr(self.download_progress_bar, 'setProgress'):
-                        self.download_progress_bar.setProgress(0)
-                        logger.info("使用setProgress设置初始值")
-                    else:
-                        self.download_progress_bar.value = 0
-                        logger.info("直接设置value属性")
-                        
+                    except Exception:
+                        logger.exception('设置进度条初始值失败')
                 if self.download_progress_label:
-                    self.download_progress_label.setText("0%")
-                    logger.info("设置标签初始文本为0%")
+                    try:
+                        self.download_progress_label.setText("0%")
+                    except Exception:
+                        logger.exception('设置进度标签初始文本失败')
                 
                 # 居中显示对话框
-                dialog_x = self.x() + (self.width() - self.downloading_dialog.width()) // 2
-                dialog_y = self.y() + (self.height() - self.downloading_dialog.height()) // 2
-                self.downloading_dialog.move(dialog_x, dialog_y)
-                logger.info(f"对话框居中显示: 位置({dialog_x}, {dialog_y})")
+                self.downloading_dialog.move(
+                    self.x() + (self.width() - self.downloading_dialog.width()) // 2,
+                    self.y() + (self.height() - self.downloading_dialog.height()) // 2
+                )
                 
                 self.downloading_dialog.show()
                 logger.info("下载进度窗口已显示")
-                
-                # 强制刷新
-                QApplication.processEvents()
+
+                # 强制刷新并调整布局以避免初始不可见的问题
+                try:
+                    QApplication.processEvents()
+                    self.downloading_dialog.adjustSize()
+                    self.downloading_dialog.updateGeometry()
+                    self.downloading_dialog.repaint()
+                except Exception:
+                    logger.exception('显示对话框后刷新/调整布局失败')
                 logger.info("UI强制刷新完成")
-            else:
-                # 如果UI文件不存在，使用代码创建
-                from qfluentwidgets import ProgressBar, BodyLabel, SubtitleLabel, CardWidget
+
+            # Ensure there is always a usable progress bar and label (fallback)
+            try:
+                # 如果 UI 文件中未找到进度条或标签，优先将回退控件加入到对话框布局中
+                layout = None
+                try:
+                    layout = self.downloading_dialog.layout()
+                except Exception:
+                    layout = None
+
+                if not hasattr(self, 'download_progress_bar') or self.download_progress_bar is None:
+                    from PyQt5.QtWidgets import QProgressBar, QLabel
+                    pb = QProgressBar()
+                    pb.setObjectName('fallback_progress_bar')
+                    pb.setRange(0, 100)
+                    pb.setValue(0)
+                    if layout is not None:
+                        layout.addWidget(pb)
+                    else:
+                        pb.setParent(self.downloading_dialog)
+                    pb.show()
+                    self.download_progress_bar = pb
+
+                if not hasattr(self, 'download_progress_label') or self.download_progress_label is None:
+                    from PyQt5.QtWidgets import QLabel
+                    lbl = QLabel('0%')
+                    lbl.setObjectName('fallback_progress_label')
+                    if layout is not None:
+                        layout.addWidget(lbl)
+                    else:
+                        lbl.setParent(self.downloading_dialog)
+                    lbl.show()
+                    self.download_progress_label = lbl
+            except Exception:
+                logger.exception('创建回退进度控件失败')
+
+            # 如果 UI 文件不存在，则使用代码创建回退对话框（确保不会在已加载 UI 的情况下再次创建）
+            if not os.path.exists(ui_path):
+                # 如果已经存在可见的下载对话框，则跳过回退对话框的创建
+                try:
+                    if getattr(self, 'downloading_dialog', None) is not None and self.downloading_dialog.isVisible():
+                        logger.info('下载对话框已存在（回退创建被跳过）')
+                        return
+                except Exception:
+                    pass
+
+                try:
+                    from qfluentwidgets import ProgressBar, BodyLabel, SubtitleLabel, CardWidget
+                except Exception:
+                    ProgressBar = None
+                    BodyLabel = None
+                    SubtitleLabel = None
+                    CardWidget = None
+
                 from PyQt5.QtWidgets import QDialog, QVBoxLayout
-                
+
                 self.downloading_dialog = QDialog(self)
                 self.downloading_dialog.setWindowTitle("正在下载")
-                self.downloading_dialog.setModal(True)
+                self.downloading_dialog.setModal(True)  # 使用模态对话框，类似测试程序
                 self.downloading_dialog.resize(400, 182)
                 
                 # 创建下载进度界面，模仿UI文件的结构
                 main_layout = QVBoxLayout()
-                
+                main_layout.setContentsMargins(12, 12, 12, 12)
+                main_layout.setSpacing(10)
+
                 # 创建卡片组件
-                card = CardWidget()
-                card.setMinimumSize(0, 120)
-                
+                if CardWidget is not None:
+                    card = CardWidget()
+                else:
+                    from PyQt5.QtWidgets import QFrame
+                    card = QFrame()
+                    card.setMinimumSize(0, 120)
+                    card.setFrameStyle(QFrame.Box)
+                    card.setStyleSheet("""
+                        QFrame { background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 10px; }
+                    """)
+
                 card_layout = QVBoxLayout()
-                
+                card_layout.setContentsMargins(8, 8, 8, 8)
+                card_layout.setSpacing(8)
+
                 # 标题标签
-                title_label = SubtitleLabel("资源仍在下载中 / The resource is still downloading")
+                if SubtitleLabel is not None:
+                    title_label = SubtitleLabel("资源仍在下载中 / The resource is still downloading")
+                else:
+                    from PyQt5.QtWidgets import QLabel
+                    title_label = QLabel("资源仍在下载中 / The resource is still downloading")
+                    title_label.setStyleSheet('font-weight: bold;')
                 title_label.setWordWrap(True)
                 card_layout.addWidget(title_label)
-                
+
                 # 描述标签
-                desc_label = BodyLabel("待资源文件下载完成后，安装将会开始 / The installation will begin once the resource files have finished downloading.")
+                if BodyLabel is not None:
+                    desc_label = BodyLabel("待资源文件下载完成后，安装将会开始 / The installation will begin once the resource files have finished downloading.")
+                else:
+                    from PyQt5.QtWidgets import QLabel
+                    desc_label = QLabel("待资源文件下载完成后，安装将会开始 / The installation will begin once the resource files have finished downloading.")
                 desc_label.setWordWrap(True)
+                desc_label.setObjectName('BodyLabel')
                 card_layout.addWidget(desc_label)
-                
-                # 进度条
-                self.download_progress_bar = ProgressBar()
-                self.download_progress_bar.setMinimumSize(0, 10)
-                
-                # 设置进度条范围
-                try:
-                    if hasattr(self.download_progress_bar, 'setRange'):
-                        self.download_progress_bar.setRange(0, 100)
-                        logger.info("设置进度条范围: 0-100 (使用setRange)")
-                    elif hasattr(self.download_progress_bar, 'setMinimum') and hasattr(self.download_progress_bar, 'setMaximum'):
-                        self.download_progress_bar.setMinimum(0)
-                        self.download_progress_bar.setMaximum(100)
-                        logger.info("设置进度条范围: 0-100 (使用setMinimum/setMaximum)")
-                    else:
-                        logger.info("进度条默认范围: 0-100")
-                except Exception as e:
-                    logger.warning(f"设置进度条范围失败: {e}")
-                
+
+                # 进度条（优先使用标准 QProgressBar 以确保视觉刷新可靠）
+                from PyQt5.QtWidgets import QProgressBar, QLabel, QSizePolicy
+                self.download_progress_bar = QProgressBar()
+                self.download_progress_bar.setObjectName('ProgressBar')
+                self.download_progress_bar.setMinimumHeight(14)
+                self.download_progress_bar.setRange(0, 100)
                 self.download_progress_bar.setValue(0)
+                self.download_progress_bar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
                 card_layout.addWidget(self.download_progress_bar)
                 
+                # 状态标签
+                self.download_progress_label = QLabel('0%')
+                self.download_progress_label.setObjectName('BodyLabel')
+                self.download_progress_label.setAlignment(0x0004)  # Qt.AlignRight
+                card_layout.addWidget(self.download_progress_label)
+
                 card.setLayout(card_layout)
                 main_layout.addWidget(card)
                 
@@ -761,26 +898,25 @@ class BloretInstaller(QMainWindow):
             
             self.downloading_dialog = QDialog(self)
             self.downloading_dialog.setWindowTitle("正在下载")
-            self.downloading_dialog.setModal(True)
-            self.downloading_dialog.resize(400, 182)
+            self.downloading_dialog.setModal(True)  # 使用模态对话框，类似测试程序
+            self.downloading_dialog.resize(420, 200)
             
             # 创建主布局
             main_layout = QVBoxLayout()
+            main_layout.setContentsMargins(12, 12, 12, 12)
+            main_layout.setSpacing(10)
             
             # 创建卡片样式的容器
             card = QFrame()
             card.setMinimumSize(0, 120)
             card.setFrameStyle(QFrame.Box)
             card.setStyleSheet("""
-                QFrame {
-                    background-color: #f8f9fa;
-                    border: 1px solid #dee2e6;
-                    border-radius: 8px;
-                    padding: 10px;
-                }
+                QFrame { background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 10px; }
             """)
             
             card_layout = QVBoxLayout()
+            card_layout.setContentsMargins(8, 8, 8, 8)
+            card_layout.setSpacing(8)
             
             # 标题标签
             title_label = QLabel("资源仍在下载中 / The resource is still downloading")
@@ -792,21 +928,24 @@ class BloretInstaller(QMainWindow):
             desc_label = QLabel("待资源文件下载完成后，安装将会开始 / The installation will begin once the resource files have finished downloading.")
             desc_label.setWordWrap(True)
             desc_label.setStyleSheet("color: #666; margin-bottom: 10px;")
+            desc_label.setObjectName('BodyLabel')
             card_layout.addWidget(desc_label)
             
             # 进度条
+            from PyQt5.QtWidgets import QSizePolicy
             self.download_progress_bar = QProgressBar()
-            self.download_progress_bar.setMinimumSize(0, 10)
-            
-            # 设置进度条范围
-            try:
-                self.download_progress_bar.setRange(0, 100)
-                logger.info("设置进度条范围: 0-100 (标准QProgressBar)")
-            except Exception as e:
-                logger.warning(f"设置进度条范围失败: {e}")
-            
+            self.download_progress_bar.setObjectName('ProgressBar')
+            self.download_progress_bar.setMinimumHeight(14)
+            self.download_progress_bar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+            self.download_progress_bar.setRange(0, 100)
             self.download_progress_bar.setValue(0)
             card_layout.addWidget(self.download_progress_bar)
+
+            # 状态标签
+            self.download_progress_label = QLabel('0%')
+            self.download_progress_label.setObjectName('BodyLabel')
+            self.download_progress_label.setAlignment(0x0004)  # Qt.AlignRight
+            card_layout.addWidget(self.download_progress_label)
             
             card.setLayout(card_layout)
             main_layout.addWidget(card)
@@ -823,89 +962,72 @@ class BloretInstaller(QMainWindow):
             
             # 强制刷新
             QApplication.processEvents()
-    
+        finally:
+            # 确保创建标志在任何路径下都被清理
+            try:
+                self._downloading_dialog_opening = False
+            except Exception:
+                pass
     def update_download_progress(self, progress):
-        """更新下载进度"""
-        logger.debug(f"更新下载进度: {progress}%")
+        """更新下载进度 - 整合测试程序的成功实现"""
+        logger.info(f"更新进度: {progress}%")
+        
         if self.downloading_dialog and hasattr(self, 'download_progress_bar'):
             # 尝试设置进度条值
             try:
                 if hasattr(self.download_progress_bar, 'setValue'):
                     self.download_progress_bar.setValue(progress)
-                    logger.debug(f"使用setValue方法设置进度条: {progress}%")
                 elif hasattr(self.download_progress_bar, 'setProgress'):
                     self.download_progress_bar.setProgress(progress)
-                    logger.debug(f"使用setProgress方法设置进度条: {progress}%")
                 else:
                     # 如果都不存在，直接设置属性
                     self.download_progress_bar.value = progress
-                    logger.debug(f"直接设置进度条属性值: {progress}%")
             except Exception as e:
-                logger.error(f"更新进度条失败: {e}")
-                logger.error(f"进度条类型: {type(self.download_progress_bar)}")
+                logger.warning(f"更新进度条失败: {e}")
             
             # 更新标签文本
             if hasattr(self, 'download_progress_label') and self.download_progress_label:
                 try:
                     self.download_progress_label.setText(f"{progress}%")
-                    logger.debug(f"更新标签文本: {progress}%")
                 except Exception as e:
-                    logger.error(f"更新标签文本失败: {e}")
+                    logger.warning(f"更新标签文本失败: {e}")
             
-            # 强制刷新UI - 使用多种方法确保界面更新
+            # 强制刷新UI
             try:
                 if self.downloading_dialog:
-                    # 方法1: 重绘对话框
-                    self.downloading_dialog.repaint()
-                    
-                    # 方法2: 处理所有事件
-                    QApplication.processEvents()
-                    
-                    # 方法3: 专门更新进度条
-                    if self.download_progress_bar:
-                        self.download_progress_bar.update()
+                    # 尝试强制刷新并触发布局更新，解决进度在调整窗口大小后才显示的问题
+                    try:
+                        self.download_progress_bar.updateGeometry()
+                    except Exception:
+                        pass
+                    try:
+                        layout = self.downloading_dialog.layout()
+                        if layout is not None:
+                            try:
+                                layout.activate()
+                            except Exception:
+                                pass
+                    except Exception:
+                        pass
+                    try:
                         self.download_progress_bar.repaint()
-                    
-                    # 方法4: 更新标签
-                    if self.download_progress_label:
-                        self.download_progress_label.update()
-                        self.download_progress_label.repaint()
-                    
-                    # 方法5: 延迟一小段时间让UI线程处理
-                    QTimer.singleShot(10, lambda: None)  # 10毫秒延迟
-                    
-                    logger.debug("UI强制刷新完成")
-            except Exception as e:
-                logger.error(f"UI刷新失败: {e}")
-        else:
-            logger.warning(f"无法更新进度: downloading_dialog={self.downloading_dialog}, 进度条存在={hasattr(self, 'download_progress_bar')}")
-        
-        # 启动定期刷新机制，确保进度条持续更新
-        if not hasattr(self, 'refresh_timer') or not self.refresh_timer:
-            self.refresh_timer = QTimer()
-            self.refresh_timer.timeout.connect(self.refresh_download_dialog)
-            self.refresh_timer.start(100)  # 每100ms刷新一次
+                    except Exception:
+                        pass
+                    self.downloading_dialog.repaint()
+                    from PyQt5.QtWidgets import QApplication
+                    QApplication.processEvents()
+            except Exception:
+                logger.exception('刷新下载对话框时出错')
 
     def refresh_download_dialog(self):
-        """定期刷新下载对话框"""
-        try:
-            if hasattr(self, 'downloading_dialog') and self.downloading_dialog:
-                # 强制刷新整个对话框
-                self.downloading_dialog.repaint()
-                self.downloading_dialog.update()
-                QApplication.processEvents()
-        except Exception as e:
-            logger.debug(f"刷新下载对话框时出错: {e}")
+        """定期刷新下载对话框（已废弃，不再使用定时刷新）"""
+        # 完全移除了定时刷新逻辑，让Qt的事件循环自然处理
+        pass
     
     def on_download_complete(self, file_path):
         """下载完成"""
         logger.info(f"下载完成: {file_path}")
         self.install_config['downloaded_file'] = file_path
-        
-        # 停止定时刷新
-        if hasattr(self, 'refresh_timer') and self.refresh_timer:
-            self.refresh_timer.stop()
-            self.refresh_timer = None
         
         # 隐藏下载进度窗口
         if self.downloading_dialog:
@@ -967,11 +1089,139 @@ class BloretInstaller(QMainWindow):
     
     def on_install_complete(self):
         """安装完成"""
-        self.show_success("安装完成", "Bloret Launcher 已成功安装！")
-        
-        # 延迟关闭
-        from PyQt5.QtCore import QTimer
-        QTimer.singleShot(2000, self.close)
+        # 弹出完成对话框，提供“完成”和“完成并打开”两个操作
+        self.show_finish_dialog("安装完成", "Bloret Launcher 已成功安装！")
+
+    def _open_installed_path(self):
+        """尝试打开已安装的可执行或包含已下载文件的文件夹"""
+        import subprocess
+        try:
+            path = None
+            # 优先尝试已记录的安装可执行路径
+            path = self.install_config.get('installed_exe') if hasattr(self, 'install_config') else None
+            if not path:
+                path = self.install_config.get('downloaded_file') if hasattr(self, 'install_config') else None
+            if not path:
+                # 没有已知路径，提示用户
+                self.show_error('未找到要打开的文件或路径。')
+                return
+            if os.path.isdir(path):
+                # 打开文件夹
+                if os.name == 'nt':
+                    os.startfile(path)
+                else:
+                    subprocess.Popen(['xdg-open', path])
+            elif os.path.isfile(path):
+                # 如果是文件，尝试打开文件或父目录
+                if path.lower().endswith('.zip') or path.lower().endswith('.tar') or path.lower().endswith('.gz'):
+                    folder = os.path.dirname(path)
+                    if os.name == 'nt':
+                        os.startfile(folder)
+                    else:
+                        subprocess.Popen(['xdg-open', folder])
+                else:
+                    # 可执行或其它文件，尝试直接打开
+                    if os.name == 'nt':
+                        os.startfile(path)
+                    else:
+                        subprocess.Popen([path])
+        except Exception:
+            logger.exception('打开已安装路径失败')
+            self.show_error('打开已安装文件/路径时发生错误')
+
+    def show_finish_dialog(self, title, message):
+        """显示安装完成对话框，包含两个按钮：'完成' 和 '完成并打开'（后者使用 PrimaryPushButton）"""
+        from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QSizePolicy
+
+        dialog = QDialog(self)
+        dialog.setWindowTitle(title)
+        dialog.setModal(True)
+        dialog.resize(480, 160)
+
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(12, 12, 12, 12)
+        main_layout.setSpacing(10)
+
+        # 消息说明
+        msg_label = QLabel(message)
+        msg_label.setWordWrap(True)
+        main_layout.addWidget(msg_label)
+
+        # 底部按钮栏（右对齐）
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+
+        if QFLUENT_AVAILABLE:
+            try:
+                from qfluentwidgets import PushButton, PrimaryPushButton
+                finish_btn = PushButton('完成')
+                finish_and_open_btn = PrimaryPushButton('完成并打开')
+            except Exception:
+                from PyQt5.QtWidgets import QPushButton
+                finish_btn = QPushButton('完成')
+                finish_and_open_btn = QPushButton('完成并打开')
+                # 给主按钮上色以示 Primary
+                finish_and_open_btn.setStyleSheet('background-color: #0078d4; color: white;')
+        else:
+            from PyQt5.QtWidgets import QPushButton
+            finish_btn = QPushButton('完成')
+            finish_and_open_btn = QPushButton('完成并打开')
+            finish_and_open_btn.setStyleSheet('background-color: #0078d4; color: white;')
+
+        # 连接按钮事件
+        def on_finish():
+            try:
+                dialog.accept()
+            finally:
+                try:
+                    self.close()
+                except Exception:
+                    pass
+
+        def on_finish_and_open():
+            try:
+                # 打开安装路径/可执行
+                self._open_installed_path()
+            finally:
+                try:
+                    dialog.accept()
+                finally:
+                    try:
+                        self.close()
+                    except Exception:
+                        pass
+
+        finish_btn.clicked.connect(on_finish)
+        finish_and_open_btn.clicked.connect(on_finish_and_open)
+
+        # 添加到布局（顺序：完成，完成并打开）
+        btn_layout.addWidget(finish_btn)
+        btn_layout.addWidget(finish_and_open_btn)
+
+        main_layout.addLayout(btn_layout)
+
+        dialog.setLayout(main_layout)
+
+        # 使主按钮有初始焦点
+        try:
+            finish_and_open_btn.setFocus()
+        except Exception:
+            pass
+
+        # 居中显示
+        dialog.move(
+            self.x() + (self.width() - dialog.width()) // 2,
+            self.y() + (self.height() - dialog.height()) // 2
+        )
+
+        dialog.show()
+        try:
+            from PyQt5.QtWidgets import QApplication
+            QApplication.processEvents()
+        except Exception:
+            pass
+        # 将 dialog 保存在实例上方便测试/后续操作
+        self._finish_dialog = dialog
         
     def show_error(self, message):
         """显示错误信息"""

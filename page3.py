@@ -225,6 +225,49 @@ class Page3(QWidget):
                     time.sleep(2)
                 elif progress == 60:
                     # 文件复制
+                    logger.info(f"开始复制文件到安装目录: {install_path}")
+                    try:
+                        # 创建安装目录（如果不存在）
+                        os.makedirs(install_path, exist_ok=True)
+                        
+                        # 如果是从解压目录复制文件
+                        if temp_extract_dir and os.path.exists(temp_extract_dir):
+                            logger.info(f"从解压目录复制文件: {temp_extract_dir} -> {install_path}")
+                            import shutil
+                            
+                            # 复制所有文件和子目录，如果文件已存在则覆盖
+                            for root, dirs, files in os.walk(temp_extract_dir):
+                                # 计算相对路径
+                                rel_path = os.path.relpath(root, temp_extract_dir)
+                                if rel_path == '.':
+                                    target_dir = install_path
+                                else:
+                                    target_dir = os.path.join(install_path, rel_path)
+                                
+                                # 创建目标目录
+                                os.makedirs(target_dir, exist_ok=True)
+                                
+                                # 复制文件
+                                for file in files:
+                                    src_file = os.path.join(root, file)
+                                    dst_file = os.path.join(target_dir, file)
+                                    
+                                    # 如果目标文件已存在，先删除再复制（覆盖）
+                                    if os.path.exists(dst_file):
+                                        logger.info(f"文件已存在，准备覆盖: {dst_file}")
+                                        os.remove(dst_file)
+                                    
+                                    shutil.copy2(src_file, dst_file)
+                                    logger.debug(f"复制文件: {src_file} -> {dst_file}")
+                            
+                            logger.info(f"文件复制完成，覆盖模式已启用")
+                        else:
+                            logger.warning(f"没有找到解压目录，跳过文件复制")
+                            
+                    except Exception as e:
+                        logger.error(f"文件复制失败: {e}")
+                        raise
+                    
                     time.sleep(1)
                 elif progress == 80:
                     # 创建快捷方式
@@ -234,22 +277,9 @@ class Page3(QWidget):
                     time.sleep(0.3)
                 
                 if progress == 100:
-                    # 启动实际的安装程序
-                    try:
-                        logger.info(f"准备启动安装程序，文件路径: {file_path}")
-                        logger.info(f"检查安装程序是否存在: {os.path.exists(file_path)}")
-                        if os.path.exists(file_path):
-                            logger.info(f"正在启动安装程序: {file_path}")
-                            result = subprocess.Popen([file_path], shell=True)
-                            logger.info(f"安装程序启动结果: {result}")
-                        else:
-                            logger.error(f"安装程序文件不存在: {file_path}")
-                            raise Exception(f"安装程序文件不存在: {file_path}")
-                    except Exception as e:
-                        logger.error(f"启动安装程序失败: {e}")
-                        import traceback
-                        traceback.print_exc()
-                        raise
+                    # 安装完成 - 文件已经通过复制方式安装完成
+                    logger.info(f"安装完成！文件已成功复制到: {install_path}")
+                    logger.info(f"安装模式: 直接文件复制（覆盖模式已启用）")
                     self.install_complete.emit()
                     
         except Exception as e:
@@ -422,10 +452,8 @@ class Page3(QWidget):
             if create_start_menu:
                 start_menu_path = self.get_start_menu_path()
                 if start_menu_path:
-                    # 在程序菜单中创建文件夹
-                    app_folder = os.path.join(start_menu_path, app_name)
-                    os.makedirs(app_folder, exist_ok=True)
-                    shortcut_path = os.path.join(app_folder, f"{app_name}.lnk")
+                    # 直接在Programs目录下创建快捷方式，不创建子文件夹
+                    shortcut_path = os.path.join(start_menu_path, f"{app_name}.lnk")
                     if self.create_windows_shortcut(exe_path, shortcut_path, app_name):
                         shortcuts_created.append("开始菜单快捷方式")
                         logger.info(f"开始菜单快捷方式创建成功: {shortcut_path}")
