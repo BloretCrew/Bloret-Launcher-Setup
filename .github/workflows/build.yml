@@ -71,7 +71,7 @@ jobs:
           --hidden-import=qfluentwidgets.window `
           --collect-all qfluentwidgets `
           --paths=. `
-          installer_v2.py
+          installer.py
       shell: pwsh
 
     - name: 创建安装向导输出目录
@@ -80,7 +80,6 @@ jobs:
         cp dist/Bloret-Launcher-Installer.exe ${{ env.OUTPUT_DIR }}/
         cp -r ui/ ${{ env.OUTPUT_DIR }}/
         cp installer.py ${{ env.OUTPUT_DIR }}/
-        cp installer_v2.py ${{ env.OUTPUT_DIR }}/
         cp page1.py ${{ env.OUTPUT_DIR }}/
         cp page2_1.py ${{ env.OUTPUT_DIR }}/
         cp page2_2.py ${{ env.OUTPUT_DIR }}/
@@ -128,7 +127,6 @@ jobs:
         # 复制安装向导相关文件到 output 目录
         $filesToCopy = @(
           "installer.py",
-          "installer_v2.py", 
           "page1.py",
           "page2_1.py",
           "page2_2.py", 
