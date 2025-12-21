@@ -64,9 +64,9 @@ jobs:
           --add-data "run_installer.bat;." `
           --add-data "setup.py;." `
           --hidden-import=qfluentwidgets `
-          --hidden-import=PyQt6.QtCore `
-          --hidden-import=PyQt6.QtGui `
-          --hidden-import=PyQt6.QtWidgets `
+          --hidden-import=PyQt5.QtCore `
+          --hidden-import=PyQt5.QtGui `
+          --hidden-import=PyQt5.QtWidgets `
           --hidden-import=qfluentwidgets.components `
           --hidden-import=qfluentwidgets.common `
           --hidden-import=qfluentwidgets.window `

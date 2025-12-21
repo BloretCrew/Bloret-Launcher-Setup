@@ -48,7 +48,7 @@ jobs:
     
     - name: 使用 Nuitka 打包安装向导
       run: |
-        python -m nuitka --standalone --onefile --windows-console-mode=disable --enable-plugin=pyqt6 --include-qt-plugins=sensible,styles --windows-icon-from-ico=bloret.ico `
+        python -m nuitka --standalone --onefile --windows-console-mode=disable --enable-plugin=pyqt5 --include-qt-plugins=sensible,styles --windows-icon-from-ico=bloret.ico `
           --include-data-files=requests=requests `
           --output-file=Bloret-Launcher-Installer.exe --assume-yes-for-downloads `
           --include-data-dir=ui=ui `
