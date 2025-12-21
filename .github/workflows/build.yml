@@ -21,7 +21,7 @@ jobs:
 
     steps:
     - name: 检出最新版本
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: 验证安装向导资源文件路径
       run: |
@@ -29,7 +29,6 @@ jobs:
         if (-not (Test-Path "bloret.ico")) { Write-Host "bloret.ico not found"; exit 1 }
         if (-not (Test-Path "ui")) { Write-Host "ui directory not found"; exit 1 }
         if (-not (Test-Path "requirements.txt")) { Write-Host "requirements.txt not found"; exit 1 }
-        if (-not (Test-Path "installer_v2.py")) { Write-Host "installer_v2.py not found"; exit 1 }
         if (-not (Test-Path "page1.py")) { Write-Host "page1.py not found"; exit 1 }
         if (-not (Test-Path "page2_1.py")) { Write-Host "page2_1.py not found"; exit 1 }
         if (-not (Test-Path "page2_2.py")) { Write-Host "page2_2.py not found"; exit 1 }
@@ -37,7 +36,7 @@ jobs:
       shell: pwsh
 
     - name: 设置 Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
@@ -115,9 +114,9 @@ jobs:
 
     steps:
     - name: 检出最新版本
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
-        ref: 'Windows'
+        ref: 'main'
 
     - name: 创建输出目录并清理
       run: |
@@ -186,7 +185,7 @@ jobs:
   #   - name: 检出最新版本
   #     uses: actions/checkout@v2
   #     with:
-  #       ref: 'Windows'
+  #       ref: 'main'
   #   - name: 验证资源文件路径
   #     run: |
   #       ls -alh .
