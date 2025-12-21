@@ -69,6 +69,7 @@ jobs:
           --hidden-import=qfluentwidgets.components `
           --hidden-import=qfluentwidgets.common `
           --hidden-import=qfluentwidgets.window `
+          --hidden-import=requests `
           --collect-all qfluentwidgets `
           --paths=. `
           installer.py
