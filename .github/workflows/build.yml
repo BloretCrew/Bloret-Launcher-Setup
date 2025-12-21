@@ -67,6 +67,7 @@ jobs:
           --hidden-import=PyQt5.QtCore `
           --hidden-import=PyQt5.QtGui `
           --hidden-import=PyQt5.QtWidgets `
+          --hidden-import=PyQt5.sip `
           --hidden-import=qfluentwidgets.components `
           --hidden-import=qfluentwidgets.common `
           --hidden-import=qfluentwidgets.window `
@@ -77,6 +78,7 @@ jobs:
           --hidden-import=requests.packages.idna `
           --collect-all requests `
           --collect-all qfluentwidgets `
+          --collect-all PyQt5 `
           --paths=. `
           installer.py
       shell: pwsh
