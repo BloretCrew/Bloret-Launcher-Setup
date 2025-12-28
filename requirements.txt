@@ -1,4 +1,5 @@
-PyQt5>=5.15.0
-PyQt5-Fluent-Widgets>=1.4.0
-pywin32>=227
-requests>=2.25.0
+PyQt5
+PyQt5-sip
+PyQt-Fluent-Widgets
+pywin32
+requests

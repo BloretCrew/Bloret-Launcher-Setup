@@ -44,9 +44,8 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pillow
-        pip install pyinstaller
-        pip install requests
+        pip install pyinstaller pillow
+      shell: pwsh
     
     - name: 使用 PyInstaller 打包安装向导
       run: |
