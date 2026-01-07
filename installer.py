@@ -17,8 +17,9 @@ from PyQt5.QtGui import QIcon, QPixmap, QFont, QColor, QPalette
 from PyQt5 import uic
 import ctypes
 import traceback
+import winreg  # 引入标准注册表库，替代 ctypes 操作
 
-loglog = False
+loglog = True
 
 # 配置日志
 if loglog:
@@ -980,7 +981,7 @@ class Page3(QWidget):
 
     def create_windows_shortcut(self, target_path, shortcut_path, description):
         """创建 Windows 快捷方式"""
-        import subprocess
+        # 移除了 subprocess 和 PowerShell 调用，这是导致报毒的主要原因
         try:
             # 解决子线程中调用 win32com 的 "尚未调用 CoInitialize" 错误
             import ctypes
@@ -996,20 +997,8 @@ class Page3(QWidget):
             shortcut.save()
             return True
         except Exception as e:
-            logger.error(f"通过 win32com 创建快捷方式失败: {e}")
-            try:
-                # 备用方案：使用 PowerShell 创建
-                # 增加 creationflags=subprocess.CREATE_NO_WINDOW 以隐藏弹出的黑窗口
-                ps_script = f'$s=(New-Object -ComObject WScript.Shell).CreateShortcut("{shortcut_path}");$s.TargetPath="{target_path}";$s.Save()'
-                subprocess.run(
-                    ['powershell', '-Command', ps_script], 
-                    capture_output=True,
-                    creationflags=subprocess.CREATE_NO_WINDOW
-                )
-                return True
-            except Exception as ps_e:
-                logger.error(f"PowerShell 创建快捷方式也失败了: {ps_e}")
-                return False
+            logger.error(f"创建快捷方式失败: {e}")
+            return False
         finally:
             # 释放 COM 资源
             try:
@@ -1807,29 +1796,24 @@ class BloretInstaller(QMainWindow):
 
 def is_dark_theme():
     try:
-        # 定义注册表路径和键名
-        reg_path = "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"
+        # 使用 Python 标准库 winreg 代替 ctypes，避免被杀毒软件误判为恶意行为
+        reg_path = r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
         reg_key = "AppsUseLightTheme"
         
-        # 打开注册表键
-        hkey = ctypes.wintypes.HKEY()
-        if ctypes.windll.advapi32.RegOpenKeyExW(0x80000001, reg_path, 0, 0x20019, ctypes.byref(hkey)) != 0:
-            return False
+        # 打开注册表键 (HKEY_CURRENT_USER)
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path)
         
         # 读取键值
-        value = ctypes.c_int()
-        size = ctypes.c_uint(4)
-        if ctypes.windll.advapi32.RegQueryValueExW(hkey, reg_key, 0, None, ctypes.byref(value), ctypes.byref(size)) != 0:
-            ctypes.windll.advapi32.RegCloseKey(hkey)
-            return False
+        value, _ = winreg.QueryValueEx(key, reg_key)
         
-        # 关闭注册表键
-        ctypes.windll.advapi32.RegCloseKey(hkey)
+        # 关闭键
+        winreg.CloseKey(key)
         
-        # 返回主题状态
-        return value.value == 0  # 0 表示深色主题，1 表示浅色主题
+        # 返回主题状态 (0 表示深色主题，1 表示浅色主题)
+        return value == 0
     except Exception as e:
-        print(f"检测主题时发生错误: {e}")
+        # 如果读取失败（例如键不存在），默认为浅色或根据需求调整
+        # print(f"检测主题时发生错误: {e}")
         return False
 
 

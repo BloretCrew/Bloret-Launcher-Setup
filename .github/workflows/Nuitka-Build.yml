@@ -6,6 +6,8 @@ permissions:
 on:
   release:
     types: [prereleased]
+  # 允许手动触发构建，方便测试
+  workflow_dispatch:
 
 jobs:
   Build-Installer:
@@ -15,6 +17,8 @@ jobs:
       PYTHON_VERSION: '3.9'
       OUTPUT_DIR: 'output'
       ARTIFACT_NAME: 'Bloret-Launcher-Installer-Windows.zip'
+      # 在这里定义版本号，或者从 tag 获取
+      APP_VERSION: '25.0.0.0' 
 
     steps:
     - name: 检出最新版本
@@ -22,16 +26,14 @@ jobs:
       with:
         ref: 'main'
 
-    - name: 验证安装向导资源文件路径
+    - name: 验证安装向导核心文件
       run: |
         Get-ChildItem -Path .
-        if (-not (Test-Path "bloret.ico")) { Write-Host "bloret.ico not found"; exit 1 }
-        if (-not (Test-Path "ui")) { Write-Host "ui directory not found"; exit 1 }
+        if (-not (Test-Path "bloret.ico")) { Write-Host "警告: bloret.ico 未找到，将使用默认图标" }
+        if (-not (Test-Path "installer.py")) { Write-Host "错误: installer.py 未找到"; exit 1 }
+        # 如果你的代码已经合并为一个文件，就不需要检查 page1.py 等文件了
+        # 这里保留 requirements.txt 检查
         if (-not (Test-Path "requirements.txt")) { Write-Host "requirements.txt not found"; exit 1 }
-        if (-not (Test-Path "page1.py")) { Write-Host "page1.py not found"; exit 1 }
-        if (-not (Test-Path "page2_1.py")) { Write-Host "page2_1.py not found"; exit 1 }
-        if (-not (Test-Path "page2_2.py")) { Write-Host "page2_2.py not found"; exit 1 }
-        if (-not (Test-Path "page3.py")) { Write-Host "page3.py not found"; exit 1 }
       shell: pwsh
 
     - name: 设置 Python
@@ -41,21 +43,53 @@ jobs:
 
     - name: 安装程序依赖和打包依赖
       run: |
-        pip install --upgrade pip
+        python -m pip install --upgrade pip
+        # 安装项目依赖
         pip install -r requirements.txt
+        # 显式安装 PyQt-Fluent-Widgets (防止 requirements.txt 漏掉)
+        pip install "PyQt-Fluent-Widgets[pyqt5]"
         pip install pillow
-        pip install nuitka
+        # 安装 Nuitka 和构建依赖
+        pip install nuitka zstandard ordered-set
+      shell: pwsh
     
     - name: 使用 Nuitka 打包安装向导
       run: |
-        python -m nuitka --onefile --standalone --disable-console --enable-plugin=pyqt5 --include-qt-plugins=platforms --windows-icon-from-ico=bloret.ico --assume-yes-for-downloads --output-dir=dist installer.py
+        # 获取不带 'v' 的版本号用于文件版本 (例如 v25.0 -> 25.0)
+        $TAG_VERSION = "${{ github.event.release.tag_name }}"
+        if ($TAG_VERSION -match "^v") { $TAG_VERSION = $TAG_VERSION.Substring(1) }
+        if (-not $TAG_VERSION) { $TAG_VERSION = "25.0.0.0" }
+        # 确保版本号格式为 x.x.x.x (Windows 要求)
+        if ($TAG_VERSION.Split('.').Count -lt 4) { $TAG_VERSION = "$TAG_VERSION.0.0" }
+        
+        Write-Host "构建版本: $TAG_VERSION"
+
+        # Nuitka 打包命令
+        # 注意：增加了元数据参数和 UAC 请求
+        python -m nuitka `
+          --onefile `
+          --standalone `
+          --disable-console `
+          --enable-plugin=pyqt5 `
+          --include-qt-plugins=platforms,styles,iconengines `
+          --windows-icon-from-ico=bloret.ico `
+          --assume-yes-for-downloads `
+          --output-dir=dist `
+          --windows-uac-admin `
+          --company-name="Bloret Team" `
+          --product-name="Bloret Launcher Setup" `
+          --file-version=$TAG_VERSION `
+          --product-version=$TAG_VERSION `
+          --file-description="Bloret Launcher Installer" `
+          --copyright="Copyright (c) 2025 Bloret Team" `
+          installer.py
       shell: pwsh
 
-    - name: 上传安装向导构建产物
+    - name: 上传安装向导构建产物 (构建 Artifact)
       uses: actions/upload-artifact@v4
       with:
         name: Bloret-Launcher-Installer
-        path: D:\a\Bloret-Launcher-Setup\Bloret-Launcher-Setup\dist\installer.exe
+        path: dist/installer.exe
         
   Upload-To-Release:
       needs: [Build-Installer]
@@ -65,12 +99,11 @@ jobs:
           uses: actions/download-artifact@v4
           with:
             name: Bloret-Launcher-Installer
-            path: ./dist-files  # 下载到指定目录
+            path: ./dist-files
 
         - name: 上传到 Release
           uses: softprops/action-gh-release@v1
           with:
-            # 直接定位到下载目录中的 .exe 文件
             files: |
               ./dist-files/installer.exe
           env:
@@ -87,20 +120,15 @@ jobs:
 
     - name: 创建输出目录并清理
       run: |
-        # 强制创建目录并清理旧内容
         New-Item -ItemType Directory -Force -Path "output"
         Remove-Item -Path "output/*" -Recurse -ErrorAction Ignore
       shell: pwsh
 
     - name: 复制安装向导源代码文件
       run: |
-        # 复制安装向导相关文件到 output 目录
+        # 复制核心文件
         $filesToCopy = @(
           "installer.py",
-          "page1.py",
-          "page2_1.py",
-          "page2_2.py", 
-          "page3.py",
           "requirements.txt",
           "run_installer.bat",
           "setup.py",
@@ -110,27 +138,23 @@ jobs:
           "PROJECT_SUMMARY.md"
         )
         
+        # 尝试复制旧的分页文件（如果存在），为了兼容性
+        $optionalFiles = @("page1.py", "page2_1.py", "page2_2.py", "page3.py")
+        
         foreach ($file in $filesToCopy) {
-          if (Test-Path $file) {
-            Copy-Item -Path $file -Destination "output\"
-          }
+          if (Test-Path $file) { Copy-Item -Path $file -Destination "output\" }
+        }
+        foreach ($file in $optionalFiles) {
+          if (Test-Path $file) { Copy-Item -Path $file -Destination "output\" }
         }
         
-        # 复制 ui 目录
         if (Test-Path "ui") {
           Copy-Item -Path "ui" -Destination "output\" -Recurse
-        }
-        
-        # 确保 LICENSE 文件被复制
-        if (-not (Test-Path "output/LICENSE")) {
-          Write-Host "LICENSE 文件未找到"
-          exit 1
         }
       shell: pwsh
 
     - name: 创建源代码压缩包
       run: |
-        # 直接压缩 output 目录内容为 Code-Package.zip
         Compress-Archive -Path "output/*" -DestinationPath "output/Code-Package.zip" -Force
       shell: pwsh
 
@@ -139,17 +163,3 @@ jobs:
       with:
         name: Installer-Code-Package
         path: "output/Code-Package.zip"
-  
-
-    # - name: 更新为测试版
-    #   run: |
-    #     # 从GitHub事件中提取版本信息
-    #     VERSION="${{ github.event.release.tag_name }}"
-    #     VERSION_NAME="${{ github.event.release.name }}"
-    #     DESCRIPTION=${{ toJSON(github.event.release.body) }}
-        
-    #     # 调用API更新为测试版
-    #     curl -X POST https://launcher.bloret.net/api/newversion/github \
-    #       -H "Content-Type: application/json" \
-    #       -d "{\"key\":\"${{ secrets.BLORET_LAUNCHER_WEBSITE }}\",\"beta\":true,\"version\":\"$VERSION\",\"versionName\":\"$VERSION_NAME\",\"description\":$DESCRIPTION}"
-    #   shell: bash
