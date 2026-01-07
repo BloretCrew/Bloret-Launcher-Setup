@@ -972,8 +972,18 @@ class Page3(QWidget):
         return os.path.splitext(os.path.basename(exe_path))[0]
 
     def get_desktop_path(self):
-        """获取桌面路径"""
-        return os.path.join(os.path.expanduser("~"), "Desktop")
+        """获取桌面路径 (支持 OneDrive 和文件夹重定向)"""
+        try:
+            # 查询注册表获取真实的桌面路径
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r'Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders')
+            path, _ = winreg.QueryValueEx(key, "Desktop")
+            winreg.CloseKey(key)
+            # 注册表路径可能包含环境变量 (如 %USERPROFILE%\Desktop)，需要展开
+            return os.path.expandvars(path)
+        except Exception as e:
+            logger.error(f"从注册表获取桌面路径失败: {e}")
+            # 如果注册表读取失败，回退到默认路径
+            return os.path.join(os.path.expanduser("~"), "Desktop")
 
     def get_start_menu_path(self):
         """获取开始菜单程序路径"""
