@@ -75,12 +75,12 @@ jobs:
           --windows-icon-from-ico=bloret.ico `
           --assume-yes-for-downloads `
           --output-dir=dist `
-          --company-name="Bloret Team" `
+          --company-name="Bloret" `
           --product-name="Bloret Launcher Setup" `
           --file-version=$TAG_VERSION `
           --product-version=$TAG_VERSION `
           --file-description="Bloret Launcher Installer" `
-          --copyright="Copyright (c) 2025 Bloret Team" `
+          --copyright="Copyright (c) 2025 Bloret" `
           installer.py
       shell: pwsh
 

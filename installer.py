@@ -19,7 +19,7 @@ import ctypes
 import traceback
 import winreg  # 引入标准注册表库，替代 ctypes 操作
 
-loglog = True
+loglog = False
 
 # 配置日志
 if loglog:
