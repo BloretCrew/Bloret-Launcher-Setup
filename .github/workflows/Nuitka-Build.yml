@@ -48,22 +48,16 @@ jobs:
     
     - name: 使用 Nuitka 打包安装向导
       run: |
-        python -m nuitka --standalone --onefile --windows-console-mode=disable --enable-plugin=pyqt5 --include-qt-plugins=sensible,styles --windows-icon-from-ico=bloret.ico `
-          --include-data-files=requests=requests `
-          --output-file=Bloret-Launcher-Installer.exe --assume-yes-for-downloads `
-          --include-data-dir=ui=ui `
-          --include-data-files=page1.py=page1.py `
-          --include-data-files=page2_1.py=page2_1.py `
-          --include-data-files=page2_2.py=page2_2.py `
-          --include-data-files=page3.py=page3.py `
-          --include-data-files=requirements.txt=requirements.txt `
-          --include-data-files=README.md=README.md `
-          --include-data-files=LICENSE=LICENSE `
-          --include-data-files=PROJECT_SUMMARY.md=PROJECT_SUMMARY.md `
-          --include-data-files=run_installer.bat=run_installer.bat `
-          --include-data-files=setup.py=setup.py `
-          --include-data-files=installer.py=installer.py `
-          installer.py
+        python -m nuitka --standalone --onefile `
+            --windows-console-mode=disable `
+            --enable-plugin=pyqt5 `
+            --include-qt-plugins=sensible,styles `
+            --collect-all=qfluentwidgets `
+            --windows-icon-from-ico=bloret.ico `
+            --include-data-dir=ui=ui `
+            --output-file=Bloret-Launcher-Installer.exe `
+            --assume-yes-for-downloads `
+            installer.py
       shell: pwsh
 
     - name: 创建安装向导输出目录
