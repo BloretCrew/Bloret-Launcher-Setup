@@ -51,31 +51,13 @@ jobs:
         python -m nuitka --onefile --disable-console --assume-yes-for-downloads --output-dir=dist installer.py
       shell: pwsh
 
-    - name: 创建安装向导输出目录
-      run: |
-        mkdir -p ${{ env.OUTPUT_DIR }}
-        cp Bloret-Launcher-Installer.exe ${{ env.OUTPUT_DIR }}/
-        cp -r ui/ ${{ env.OUTPUT_DIR }}/
-        cp installer.py ${{ env.OUTPUT_DIR }}/
-        cp page1.py ${{ env.OUTPUT_DIR }}/
-        cp page2_1.py ${{ env.OUTPUT_DIR }}/
-        cp page2_2.py ${{ env.OUTPUT_DIR }}/
-        cp page3.py ${{ env.OUTPUT_DIR }}/
-        cp requirements.txt ${{ env.OUTPUT_DIR }}/
-        cp run_installer.bat ${{ env.OUTPUT_DIR }}/
-        cp setup.py ${{ env.OUTPUT_DIR }}/
-        cp LICENSE ${{ env.OUTPUT_DIR }}/
-        cp README.md ${{ env.OUTPUT_DIR }}/
-        cp PROJECT_SUMMARY.md ${{ env.OUTPUT_DIR }}/
-        cp bloret.ico ${{ env.OUTPUT_DIR }}/
-
     - name: 上传安装向导构建产物
       uses: actions/upload-artifact@v4
       with:
         name: Bloret-Launcher-Installer
-        path: Bloret-Launcher-Installer.exe
+        path: D:\a\Bloret-Launcher-Setup\Bloret-Launcher-Setup\dist\installer.exe
         
-  Upload-To-Release:
+Upload-To-Release:
     needs: [Build-Installer]
     runs-on: ubuntu-latest
     steps:
@@ -83,18 +65,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: Bloret-Launcher-Installer
-          path: Bloret-Launcher-Installer
+          path: ./dist-files  # 下载到指定目录
 
-      - name: 创建安装向导发布压缩包
-        run: |
-          Compress-Archive -Path "Bloret-Launcher-Installer/*" -DestinationPath "Bloret-Launcher-Installer.zip" -Force
-        shell: pwsh
-
-      - name: 上传到Release
+      - name: 上传到 Release
         uses: softprops/action-gh-release@v1
         with:
+          # 直接定位到下载目录中的 .exe 文件
           files: |
-            Bloret-Launcher-Installer.zip
+            ./dist-files/installer.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
