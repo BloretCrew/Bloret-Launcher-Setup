@@ -75,7 +75,6 @@ jobs:
           --windows-icon-from-ico=bloret.ico `
           --assume-yes-for-downloads `
           --output-dir=dist `
-          # --windows-uac-admin `
           --company-name="Bloret Team" `
           --product-name="Bloret Launcher Setup" `
           --file-version=$TAG_VERSION `
