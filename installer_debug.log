@@ -21024,3 +21024,279 @@ OSError: [WinError 87] 参数错误。
 [2026-01-07 11:08:14,976] INFO - 已清理临时解压目录: C:\Users\0570\AppData\Local\Temp\bloret_temp
 [2026-01-07 11:08:16,094] INFO - 准备启动程序: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\Bloret-Launcher.exe
 [2026-01-07 11:08:16,293] INFO - 程序启动指令已通过 Shell 发出
+[2026-01-07 12:39:41,325] DEBUG - Starting new HTTP connection (1): 127.0.0.1:7890
+[2026-01-07 12:39:41,400] DEBUG - http://127.0.0.1:7890 "GET http://pcfs.eno.ink:3001/BL.png HTTP/1.1" 200 8154618
+[2026-01-07 12:39:42,961] DEBUG - Starting new HTTP connection (1): 127.0.0.1:7890
+[2026-01-07 12:39:43,019] DEBUG - http://127.0.0.1:7890 "GET http://pcfs.eno.ink:3001/BLlight.png HTTP/1.1" 200 680245
+[2026-01-07 12:39:43,458] INFO - 开始获取版本信息
+[2026-01-07 12:39:43,515] DEBUG - Starting new HTTP connection (1): 127.0.0.1:7890
+[2026-01-07 12:39:43,588] DEBUG - http://127.0.0.1:7890 "GET http://pcfs.eno.ink:3001/api/info HTTP/1.1" 200 1655
+[2026-01-07 12:39:43,591] INFO - 成功获取版本信息: {'latestVersion': '8.1', 'description': 'Conveniently manage your Minecraft, conveniently play Bloret. 便捷地管理你的 Minecraft，便捷地游玩 Bloret。', 'newVersionDescription': '我们迫不及待让你体验到新功能！欢迎体验 BL 8.1\n\n有什么新东西吗？\n\nNuitka 打包\nBloret Launcher 运行速度将会得到极大的提升\n\nBloriko 询问功能\nBloret 服务器信息查询功能\n以上两项新功能是 Bloret Launcher 对 Bloret 服务器融合的巨大进步！欢迎体验反馈！', 'beta': {'enabled': True, 'version': '26b2', 'versionName': '26 Beta 2', 'description': 'Bloriko with Modrinth、Bloriko DeepThink 和其他一些功能，更多信息请访问：https://github.com/BloretCrew/Bloret-Launcher/releases/tag/26b2'}, 'downloads': {'stable': {'gitcode': {'exe': 'https://gitcode.com/Bloret/Bloret-Launcher/releases/download/8.1/Bloret-Launcher-Setup.exe', 'zip': 'https://gitcode.com/Bloret/Bloret-Launcher/releases/download/8.1/Bloret-Launcher-Windows.zip'}, 'github': {'exe': 'https://github.com/BloretCrew/Bloret-Launcher/releases/download/8.1/Bloret-Launcher-Setup.exe', 'zip': 'https://github.com/BloretCrew/Bloret-Launcher/releases/download/8.1/Bloret-Launcher-Windows.zip'}}, 'beta': {'gitcode': {'exe': 'https://gitcode.com/Bloret/Bloret-Launcher/releases/download/26b2/Bloret-Launcher-Setup.exe', 'zip': 'https://gitcode.com/Bloret/Bloret-Launcher/releases/download/26b2/Bloret-Launcher-Windows.zip'}, 'github': {'exe': 'https://github.com/BloretCrew/Bloret-Launcher/releases/download/26b2/Bloret-Launcher-Setup.exe', 'zip': 'https://github.com/BloretCrew/Bloret-Launcher/releases/download/26b2/Bloret-Launcher-Windows.zip'}}}}
+[2026-01-07 12:39:43,695] INFO - 开始清理网络线程
+[2026-01-07 12:39:43,695] INFO - 正在停止网络线程
+[2026-01-07 12:39:43,696] INFO - 网络线程已清理
+[2026-01-07 12:39:43,697] INFO - 清理网络工作对象
+[2026-01-07 12:39:43,697] INFO - 网络线程清理完成
+[2026-01-07 12:39:59,157] INFO - 快速安装按钮被点击
+[2026-01-07 12:39:59,157] INFO - 快速安装配置: {'install_path': 'C:\\Users\\0570\\AppData\\Roaming\\Bloret-Launcher\\Bloret-Launcher', 'create_desktop_shortcut': True, 'create_start_menu_item': True, 'installation_type': 'quick', 'latest_version': '8.1', 'download_url': 'https://gitcode.com/Bloret/Bloret-Launcher/releases/download/8.1/Bloret-Launcher-Windows.zip', 'downloaded_file': ''}
+[2026-01-07 12:39:59,157] INFO - 直接跳转到安装页面
+[2026-01-07 12:39:59,160] INFO - 开始下载流程
+[2026-01-07 12:39:59,160] INFO - 开始下载流程
+[2026-01-07 12:39:59,160] INFO - 下载URL: https://gitcode.com/Bloret/Bloret-Launcher/releases/download/8.1/Bloret-Launcher-Windows.zip
+[2026-01-07 12:39:59,160] INFO - 显示下载进度窗口
+[2026-01-07 12:39:59,161] INFO - 开始显示下载进度窗口
+[2026-01-07 12:39:59,193] INFO - 下载进度窗口（稳定版）已显示
+[2026-01-07 12:39:59,392] INFO - 创建网络工作线程
+[2026-01-07 12:39:59,392] INFO - 网络工作对象已移动到线程
+[2026-01-07 12:39:59,392] INFO - 连接网络线程信号
+[2026-01-07 12:39:59,392] INFO - 信号连接完成
+[2026-01-07 12:39:59,393] INFO - 启动网络线程
+[2026-01-07 12:39:59,393] INFO - 网络线程已启动
+[2026-01-07 12:39:59,395] INFO - 开始下载文件: https://gitcode.com/Bloret/Bloret-Launcher/releases/download/8.1/Bloret-Launcher-Windows.zip -> Bloret-Launcher-Setup.zip
+[2026-01-07 12:39:59,396] INFO - 临时文件路径: C:\Users\0570\AppData\Local\Temp\Bloret-Launcher-Setup.zip
+[2026-01-07 12:39:59,400] DEBUG - Starting new HTTPS connection (1): gitcode.com:443
+[2026-01-07 12:40:00,052] DEBUG - https://gitcode.com:443 "GET /Bloret/Bloret-Launcher/releases/download/8.1/Bloret-Launcher-Windows.zip HTTP/1.1" 302 None
+[2026-01-07 12:40:00,063] DEBUG - Starting new HTTPS connection (1): file-cdn.gitcode.com:443
+[2026-01-07 12:40:00,664] DEBUG - https://file-cdn.gitcode.com:443 "GET /7886465/releases/untagger_6c3d76eec4cc4df2b8306f350909dd2b/Bloret-Launcher-Windows.zip?auth_key=1767760800-7b1c5b8aa52d4a93a19a067b133b5bf7-0-d93aa03456fb465c1bc8030d86aa33f77c345cee5bed5af1edc2cb9d4e1f0520 HTTP/1.1" 200 75981686
+[2026-01-07 12:40:00,665] INFO - 文件总大小: 75981686 bytes
+[2026-01-07 12:40:00,769] DEBUG - 下载进度: 0%
+[2026-01-07 12:40:02,092] DEBUG - 下载进度: 20%
+[2026-01-07 12:40:04,932] DEBUG - 下载进度: 60%
+[2026-01-07 12:40:06,269] DEBUG - 下载进度: 80%
+[2026-01-07 12:40:06,979] DEBUG - 下载进度: 90%
+[2026-01-07 12:40:07,565] INFO - 文件下载完成: C:\Users\0570\AppData\Local\Temp\Bloret-Launcher-Setup.zip
+[2026-01-07 12:40:07,565] INFO - 下载完成: C:\Users\0570\AppData\Local\Temp\Bloret-Launcher-Setup.zip
+[2026-01-07 12:40:07,566] INFO - 隐藏下载进度窗口
+[2026-01-07 12:40:07,573] INFO - 开始清理网络线程
+[2026-01-07 12:40:07,574] INFO - 开始清理网络线程
+[2026-01-07 12:40:07,575] INFO - 正在停止网络线程
+[2026-01-07 12:40:07,579] INFO - 网络线程已清理
+[2026-01-07 12:40:07,580] INFO - 清理网络工作对象
+[2026-01-07 12:40:07,580] INFO - 网络线程清理完成
+[2026-01-07 12:40:07,580] INFO - 开始安装流程
+[2026-01-07 12:40:07,581] INFO - 开始安装流程
+[2026-01-07 12:40:07,581] INFO - 调用page3的start_installation方法
+[2026-01-07 12:40:07,582] INFO - 安装配置: {'install_path': 'C:\\Users\\0570\\AppData\\Roaming\\Bloret-Launcher\\Bloret-Launcher', 'create_desktop_shortcut': True, 'create_start_menu_item': True, 'installation_type': 'quick', 'latest_version': '8.1', 'download_url': 'https://gitcode.com/Bloret/Bloret-Launcher/releases/download/8.1/Bloret-Launcher-Windows.zip', 'downloaded_file': 'C:\\Users\\0570\\AppData\\Local\\Temp\\Bloret-Launcher-Setup.zip'}
+[2026-01-07 12:40:07,583] INFO - Page3: 开始安装流程
+[2026-01-07 12:40:07,583] INFO - 安装配置: {'install_path': 'C:\\Users\\0570\\AppData\\Roaming\\Bloret-Launcher\\Bloret-Launcher', 'create_desktop_shortcut': True, 'create_start_menu_item': True, 'installation_type': 'quick', 'latest_version': '8.1', 'download_url': 'https://gitcode.com/Bloret/Bloret-Launcher/releases/download/8.1/Bloret-Launcher-Windows.zip', 'downloaded_file': 'C:\\Users\\0570\\AppData\\Local\\Temp\\Bloret-Launcher-Setup.zip'}
+[2026-01-07 12:40:07,583] INFO - 创建安装线程
+[2026-01-07 12:40:07,585] INFO - 模拟安装过程开始
+[2026-01-07 12:40:07,585] INFO - 安装线程已启动
+[2026-01-07 12:40:07,586] INFO - 检查下载的文件: C:\Users\0570\AppData\Local\Temp\Bloret-Launcher-Setup.zip
+[2026-01-07 12:40:07,586] INFO - 找到下载的文件，执行实际安装: C:\Users\0570\AppData\Local\Temp\Bloret-Launcher-Setup.zip
+[2026-01-07 12:40:08,189] INFO - 进度40%: 处理文件 C:\Users\0570\AppData\Local\Temp\Bloret-Launcher-Setup.zip
+[2026-01-07 12:40:08,190] INFO - 检测到zip文件，开始解压: C:\Users\0570\AppData\Local\Temp\Bloret-Launcher-Setup.zip
+[2026-01-07 12:40:08,190] INFO - 创建临时解压目录: C:\Users\0570\AppData\Local\Temp\bloret_temp
+[2026-01-07 12:40:08,191] INFO - 临时解压目录创建成功: C:\Users\0570\AppData\Local\Temp\bloret_temp
+[2026-01-07 12:40:08,192] INFO - 开始解压zip文件到: C:\Users\0570\AppData\Local\Temp\bloret_temp
+[2026-01-07 12:40:08,996] INFO - zip文件解压完成
+[2026-01-07 12:40:08,997] INFO - 在解压目录中查找安装程序: C:\Users\0570\AppData\Local\Temp\bloret_temp
+[2026-01-07 12:40:08,997] INFO - 开始在目录中查找安装程序: C:\Users\0570\AppData\Local\Temp\bloret_temp
+[2026-01-07 12:40:08,998] DEBUG - 遍历解压目录: C:\Users\0570\AppData\Local\Temp\bloret_temp
+[2026-01-07 12:40:09,001] DEBUG - 未找到特定名称安装程序，正在分析 3 个exe文件...
+[2026-01-07 12:40:09,004] INFO - 选择最大的exe文件作为安装程序: C:\Users\0570\AppData\Local\Temp\bloret_temp\Bloret-Launcher.exe (Size: 53451560 bytes)
+[2026-01-07 12:40:09,007] INFO - 找到的安装程序: C:\Users\0570\AppData\Local\Temp\bloret_temp\Bloret-Launcher.exe
+[2026-01-07 12:40:09,008] INFO - 更新安装程序路径为: C:\Users\0570\AppData\Local\Temp\bloret_temp\Bloret-Launcher.exe
+[2026-01-07 12:40:11,009] INFO - 开始复制文件到安装目录: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher
+[2026-01-07 12:40:11,010] INFO - 从解压目录复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher
+[2026-01-07 12:40:11,012] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\Bloret-Launcher.exe
+[2026-01-07 12:40:11,082] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\Bloret-Launcher.exe -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\Bloret-Launcher.exe
+[2026-01-07 12:40:11,083] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\bloret.ico
+[2026-01-07 12:40:11,084] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\bloret.ico -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\bloret.ico
+[2026-01-07 12:40:11,085] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\cmcl.blank.json
+[2026-01-07 12:40:11,086] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\cmcl.blank.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\cmcl.blank.json
+[2026-01-07 12:40:11,087] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\cmcl.exe
+[2026-01-07 12:40:11,092] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\cmcl.exe -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\cmcl.exe
+[2026-01-07 12:40:11,093] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\cmcl.json
+[2026-01-07 12:40:11,095] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\cmcl.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\cmcl.json
+[2026-01-07 12:40:11,096] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\cmcl_save.json
+[2026-01-07 12:40:11,097] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\cmcl_save.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\cmcl_save.json
+[2026-01-07 12:40:11,097] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\config.json
+[2026-01-07 12:40:11,099] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\config.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\config.json
+[2026-01-07 12:40:11,100] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\frpc.exe
+[2026-01-07 12:40:11,115] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\frpc.exe -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\frpc.exe
+[2026-01-07 12:40:11,115] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\frpc.toml
+[2026-01-07 12:40:11,117] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\frpc.toml -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\frpc.toml
+[2026-01-07 12:40:11,117] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\JavaWrapper.jar
+[2026-01-07 12:40:11,119] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\JavaWrapper.jar -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\JavaWrapper.jar
+[2026-01-07 12:40:11,119] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\LICENSE
+[2026-01-07 12:40:11,120] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\LICENSE -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\LICENSE
+[2026-01-07 12:40:11,121] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\servers.dat
+[2026-01-07 12:40:11,123] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\servers.dat -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\servers.dat
+[2026-01-07 12:40:11,125] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\af-ZA.json
+[2026-01-07 12:40:11,127] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\af-ZA.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\af-ZA.json
+[2026-01-07 12:40:11,127] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\ar-SA.json
+[2026-01-07 12:40:11,128] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\ar-SA.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\ar-SA.json
+[2026-01-07 12:40:11,129] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\ca-ES.json
+[2026-01-07 12:40:11,130] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\ca-ES.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\ca-ES.json
+[2026-01-07 12:40:11,130] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\cs-CZ.json
+[2026-01-07 12:40:11,131] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\cs-CZ.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\cs-CZ.json
+[2026-01-07 12:40:11,132] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\da-DK.json
+[2026-01-07 12:40:11,133] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\da-DK.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\da-DK.json
+[2026-01-07 12:40:11,133] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\de-DE.json
+[2026-01-07 12:40:11,135] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\de-DE.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\de-DE.json
+[2026-01-07 12:40:11,135] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\de.json
+[2026-01-07 12:40:11,136] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\de.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\de.json
+[2026-01-07 12:40:11,137] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\Default.json
+[2026-01-07 12:40:11,138] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\Default.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\Default.json
+[2026-01-07 12:40:11,138] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\el-GR.json
+[2026-01-07 12:40:11,141] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\el-GR.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\el-GR.json
+[2026-01-07 12:40:11,142] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\en-CN.json
+[2026-01-07 12:40:11,144] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\en-CN.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\en-CN.json
+[2026-01-07 12:40:11,144] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\en-GB.json
+[2026-01-07 12:40:11,146] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\en-GB.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\en-GB.json
+[2026-01-07 12:40:11,146] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\en-US.json
+[2026-01-07 12:40:11,147] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\en-US.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\en-US.json
+[2026-01-07 12:40:11,148] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\es-ES.json
+[2026-01-07 12:40:11,149] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\es-ES.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\es-ES.json
+[2026-01-07 12:40:11,149] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\fi-FI.json
+[2026-01-07 12:40:11,150] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\fi-FI.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\fi-FI.json
+[2026-01-07 12:40:11,151] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\fr-FR.json
+[2026-01-07 12:40:11,152] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\fr-FR.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\fr-FR.json
+[2026-01-07 12:40:11,152] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\fr.json
+[2026-01-07 12:40:11,154] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\fr.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\fr.json
+[2026-01-07 12:40:11,154] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\gt-ZH.json
+[2026-01-07 12:40:11,156] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\gt-ZH.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\gt-ZH.json
+[2026-01-07 12:40:11,156] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\he-IL.json
+[2026-01-07 12:40:11,159] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\he-IL.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\he-IL.json
+[2026-01-07 12:40:11,160] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\hu-HU.json
+[2026-01-07 12:40:11,161] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\hu-HU.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\hu-HU.json
+[2026-01-07 12:40:11,162] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\it-IT.json
+[2026-01-07 12:40:11,163] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\it-IT.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\it-IT.json
+[2026-01-07 12:40:11,164] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\ja-JP.json
+[2026-01-07 12:40:11,165] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\ja-JP.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\ja-JP.json
+[2026-01-07 12:40:11,165] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\ja.json
+[2026-01-07 12:40:11,167] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\ja.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\ja.json
+[2026-01-07 12:40:11,167] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\ko-KR.json
+[2026-01-07 12:40:11,168] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\ko-KR.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\ko-KR.json
+[2026-01-07 12:40:11,169] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\ko.json
+[2026-01-07 12:40:11,170] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\ko.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\ko.json
+[2026-01-07 12:40:11,170] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\nl-NL.json
+[2026-01-07 12:40:11,172] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\nl-NL.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\nl-NL.json
+[2026-01-07 12:40:11,173] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\no-NO.json
+[2026-01-07 12:40:11,174] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\no-NO.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\no-NO.json
+[2026-01-07 12:40:11,175] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\pl-PL.json
+[2026-01-07 12:40:11,177] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\pl-PL.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\pl-PL.json
+[2026-01-07 12:40:11,178] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\pt-BR.json
+[2026-01-07 12:40:11,180] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\pt-BR.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\pt-BR.json
+[2026-01-07 12:40:11,180] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\pt-PT.json
+[2026-01-07 12:40:11,183] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\pt-PT.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\pt-PT.json
+[2026-01-07 12:40:11,183] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\ro-RO.json
+[2026-01-07 12:40:11,185] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\ro-RO.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\ro-RO.json
+[2026-01-07 12:40:11,186] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\ru-RU.json
+[2026-01-07 12:40:11,187] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\ru-RU.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\ru-RU.json
+[2026-01-07 12:40:11,187] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\sr-SP.json
+[2026-01-07 12:40:11,190] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\sr-SP.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\sr-SP.json
+[2026-01-07 12:40:11,190] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\sv-SE.json
+[2026-01-07 12:40:11,193] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\sv-SE.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\sv-SE.json
+[2026-01-07 12:40:11,193] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\tr-TR.json
+[2026-01-07 12:40:11,195] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\tr-TR.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\tr-TR.json
+[2026-01-07 12:40:11,195] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\uk-UA.json
+[2026-01-07 12:40:11,197] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\uk-UA.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\uk-UA.json
+[2026-01-07 12:40:11,197] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\vi-VN.json
+[2026-01-07 12:40:11,198] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\vi-VN.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\vi-VN.json
+[2026-01-07 12:40:11,199] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\zh-cn.json
+[2026-01-07 12:40:11,200] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\zh-cn.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\zh-cn.json
+[2026-01-07 12:40:11,201] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\zh-TW.json
+[2026-01-07 12:40:11,202] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\zh-TW.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\zh-TW.json
+[2026-01-07 12:40:11,202] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\zh-wy.json
+[2026-01-07 12:40:11,203] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\lang\zh-wy.json -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\lang\zh-wy.json
+[2026-01-07 12:40:11,204] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\.DS_Store
+[2026-01-07 12:40:11,206] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\.DS_Store -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\.DS_Store
+[2026-01-07 12:40:11,207] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\bbs.ui
+[2026-01-07 12:40:11,209] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\bbs.ui -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\bbs.ui
+[2026-01-07 12:40:11,209] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\BL_download.ui
+[2026-01-07 12:40:11,210] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\BL_download.ui -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\BL_download.ui
+[2026-01-07 12:40:11,211] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\BL_download_version.ui
+[2026-01-07 12:40:11,212] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\BL_download_version.ui -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\BL_download_version.ui
+[2026-01-07 12:40:11,213] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\client.ui
+[2026-01-07 12:40:11,214] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\client.ui -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\client.ui
+[2026-01-07 12:40:11,214] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\download.old.ui
+[2026-01-07 12:40:11,216] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\download.old.ui -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\download.old.ui
+[2026-01-07 12:40:11,216] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\download.ui
+[2026-01-07 12:40:11,217] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\download.ui -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\download.ui
+[2026-01-07 12:40:11,218] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\download_load.ui
+[2026-01-07 12:40:11,219] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\download_load.ui -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\download_load.ui
+[2026-01-07 12:40:11,219] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\ERROR.ui
+[2026-01-07 12:40:11,221] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\ERROR.ui -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\ERROR.ui
+[2026-01-07 12:40:11,221] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\forum.ui
+[2026-01-07 12:40:11,223] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\forum.ui -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\forum.ui
+[2026-01-07 12:40:11,223] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\home.ui
+[2026-01-07 12:40:11,226] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\home.ui -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\home.ui
+[2026-01-07 12:40:11,226] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\info.ui
+[2026-01-07 12:40:11,228] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\info.ui -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\info.ui
+[2026-01-07 12:40:11,228] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\MCVer_downloading.ui
+[2026-01-07 12:40:11,229] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\MCVer_downloading.ui -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\MCVer_downloading.ui
+[2026-01-07 12:40:11,230] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\mods.ui
+[2026-01-07 12:40:11,231] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\mods.ui -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\mods.ui
+[2026-01-07 12:40:11,231] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\passport.old.ui
+[2026-01-07 12:40:11,233] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\passport.old.ui -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\passport.old.ui
+[2026-01-07 12:40:11,233] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\passport.ui
+[2026-01-07 12:40:11,234] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\passport.ui -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\passport.ui
+[2026-01-07 12:40:11,235] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\passport_notdone_account.ui
+[2026-01-07 12:40:11,236] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\passport_notdone_account.ui -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\passport_notdone_account.ui
+[2026-01-07 12:40:11,236] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\settings.ui
+[2026-01-07 12:40:11,238] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\settings.ui -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\settings.ui
+[2026-01-07 12:40:11,238] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\tools.ui
+[2026-01-07 12:40:11,240] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\tools.ui -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\tools.ui
+[2026-01-07 12:40:11,241] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\version.ui
+[2026-01-07 12:40:11,244] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\version.ui -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\version.ui
+[2026-01-07 12:40:11,246] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\.DS_Store
+[2026-01-07 12:40:11,248] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\icon\.DS_Store -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\.DS_Store
+[2026-01-07 12:40:11,248] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\Bloret.ico
+[2026-01-07 12:40:11,251] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\icon\Bloret.ico -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\Bloret.ico
+[2026-01-07 12:40:11,251] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\bloret.png
+[2026-01-07 12:40:11,253] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\icon\bloret.png -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\bloret.png
+[2026-01-07 12:40:11,254] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\Command_Block.gif
+[2026-01-07 12:40:11,257] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\icon\Command_Block.gif -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\Command_Block.gif
+[2026-01-07 12:40:11,257] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\desktop.ini
+[2026-01-07 12:40:11,260] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\icon\desktop.ini -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\desktop.ini
+[2026-01-07 12:40:11,260] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\exeapps.png
+[2026-01-07 12:40:11,263] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\icon\exeapps.png -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\exeapps.png
+[2026-01-07 12:40:11,263] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\fabric.jpg
+[2026-01-07 12:40:11,265] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\icon\fabric.jpg -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\fabric.jpg
+[2026-01-07 12:40:11,266] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\favicon.ico
+[2026-01-07 12:40:11,268] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\icon\favicon.ico -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\favicon.ico
+[2026-01-07 12:40:11,268] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\github.png
+[2026-01-07 12:40:11,271] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\icon\github.png -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\github.png
+[2026-01-07 12:40:11,272] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\Grass_Block.png
+[2026-01-07 12:40:11,274] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\icon\Grass_Block.png -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\Grass_Block.png
+[2026-01-07 12:40:11,275] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\home.png
+[2026-01-07 12:40:11,286] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\icon\home.png -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\home.png
+[2026-01-07 12:40:11,287] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\java.png
+[2026-01-07 12:40:11,290] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\icon\java.png -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\java.png
+[2026-01-07 12:40:11,290] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\loading.gif
+[2026-01-07 12:40:11,293] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\icon\loading.gif -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\loading.gif
+[2026-01-07 12:40:11,294] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\loading2.gif
+[2026-01-07 12:40:11,296] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\icon\loading2.gif -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\loading2.gif
+[2026-01-07 12:40:11,297] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\loading3.gif
+[2026-01-07 12:40:11,299] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\icon\loading3.gif -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\loading3.gif
+[2026-01-07 12:40:11,300] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\OnlineClient.gif
+[2026-01-07 12:40:11,308] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\icon\OnlineClient.gif -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\OnlineClient.gif
+[2026-01-07 12:40:11,308] INFO - 文件已存在，准备覆盖: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\qq.png
+[2026-01-07 12:40:11,311] DEBUG - 复制文件: C:\Users\0570\AppData\Local\Temp\bloret_temp\ui\icon\qq.png -> C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\ui\icon\qq.png
+[2026-01-07 12:40:11,312] INFO - 文件复制完成，覆盖模式已启用
+[2026-01-07 12:40:12,312] INFO - 开始创建快捷方式
+[2026-01-07 12:40:12,313] INFO - 安装路径: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher
+[2026-01-07 12:40:12,313] INFO - 桌面快捷方式: True
+[2026-01-07 12:40:12,314] INFO - 开始菜单快捷方式: True
+[2026-01-07 12:40:12,314] INFO - 找到可执行文件: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher\Bloret-Launcher.exe
+[2026-01-07 12:40:12,314] INFO - 应用名称: Bloret-Launcher
+[2026-01-07 12:40:12,478] ERROR - 通过 win32com 创建快捷方式失败: (-2147352567, '发生意外。', (0, 'WshShortcut.Save', '无法保存快捷方式“C:\\Users\\0570\\Desktop\\Bloret-Launcher.lnk”。', None, 0, -2147024893), None)
+[2026-01-07 12:40:14,093] INFO - 桌面快捷方式创建成功: C:\Users\0570\Desktop\Bloret-Launcher.lnk
+[2026-01-07 12:40:14,136] INFO - 开始菜单快捷方式创建成功: C:\Users\0570\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Bloret-Launcher.lnk
+[2026-01-07 12:40:14,137] INFO - 快捷方式创建完成: 桌面快捷方式, 开始菜单快捷方式
+[2026-01-07 12:40:15,238] INFO - 安装完成！文件已成功复制到: C:\Users\0570\AppData\Roaming\Bloret-Launcher\Bloret-Launcher
+[2026-01-07 12:40:15,238] INFO - 安装模式: 直接文件复制（覆盖模式已启用）
+[2026-01-07 12:40:15,238] INFO - finally块: 准备清理临时文件
+[2026-01-07 12:40:15,240] INFO - finally块: file_path = C:\Users\0570\AppData\Local\Temp\bloret_temp\Bloret-Launcher.exe
+[2026-01-07 12:40:15,241] INFO - finally块: temp_extract_dir = C:\Users\0570\AppData\Local\Temp\bloret_temp
+[2026-01-07 12:40:15,241] INFO - 使用安装配置中的下载文件: C:\Users\0570\AppData\Local\Temp\Bloret-Launcher-Setup.zip
+[2026-01-07 12:40:15,242] INFO - 开始清理临时文件...
+[2026-01-07 12:40:15,243] INFO - 下载文件: C:\Users\0570\AppData\Local\Temp\Bloret-Launcher-Setup.zip
+[2026-01-07 12:40:15,244] INFO - 临时解压目录: C:\Users\0570\AppData\Local\Temp\bloret_temp
+[2026-01-07 12:40:15,248] DEBUG - 检查下载的zip文件是否存在: True
+[2026-01-07 12:40:15,249] INFO - 正在删除下载的zip文件: C:\Users\0570\AppData\Local\Temp\Bloret-Launcher-Setup.zip
+[2026-01-07 12:40:15,263] INFO - 已删除下载的zip文件: C:\Users\0570\AppData\Local\Temp\Bloret-Launcher-Setup.zip
+[2026-01-07 12:40:15,264] DEBUG - 检查临时解压目录是否存在: True
+[2026-01-07 12:40:15,265] INFO - 正在清理临时解压目录: C:\Users\0570\AppData\Local\Temp\bloret_temp

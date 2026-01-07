@@ -78,11 +78,16 @@ class Page1(QWidget):
         logo_label.setFixedSize(100, 100)
         logo_label.setScaledContents(True)
         
-        # 尝试加载 Logo
+        # 尝试从 URL 加载 Logo
         try:
-            pixmap = QPixmap("ui/bloret.png")
+            response = requests.get("http://pcfs.eno.ink:3001/BL.png", timeout=5)
+            pixmap = QPixmap()
+            pixmap.loadFromData(response.content)
             if not pixmap.isNull():
                 logo_label.setPixmap(pixmap)
+            else:
+                logo_label.setText("LOGO")
+                logo_label.setAlignment(Qt.AlignCenter)
         except:
             logo_label.setText("LOGO")
             logo_label.setAlignment(Qt.AlignCenter)
@@ -490,13 +495,15 @@ class Page3(QWidget):
         image_layout = QHBoxLayout()
         image_layout.addStretch()
         
-        # 尝试加载图片
+        # 尝试从 URL 加载图片
         self.image_label = StrongBodyLabel()
         self.image_label.setFixedSize(382, 297)
         self.image_label.setScaledContents(True)
         
         try:
-            pixmap = QPixmap("ui/BLroundHome.png")
+            response = requests.get("http://pcfs.eno.ink:3001/BLlight.png", timeout=5)
+            pixmap = QPixmap()
+            pixmap.loadFromData(response.content)
             if not pixmap.isNull():
                 self.image_label.setPixmap(pixmap)
             else:
@@ -951,7 +958,7 @@ class Page3(QWidget):
         
         # 显示两个按钮
         self.finish_button.setVisible(True)
-        self.finish_open_button.setVisible(True)
+        # self.finish_open_button.setVisible(True)
     
     def get_app_name_from_path(self, exe_path):
         """从路径获取应用名称"""
