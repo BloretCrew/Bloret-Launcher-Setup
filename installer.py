@@ -910,7 +910,9 @@ class Page3(QWidget):
 
     def on_finish_clicked(self):
         """点击完成按钮"""
-        QApplication.quit()
+        logger.info("用户点击完成，程序准备退出")
+        # 使用定时器延迟退出，给 UI 线程一点处理残余事件的时间，防止闪退感
+        QTimer.singleShot(100, QApplication.quit)
 
     def on_finish_and_open_clicked(self):
         """点击完成并打开按钮"""
@@ -965,7 +967,12 @@ class Page3(QWidget):
 
     def create_windows_shortcut(self, target_path, shortcut_path, description):
         """创建 Windows 快捷方式"""
+        import subprocess
         try:
+            # 解决子线程中调用 win32com 的 "尚未调用 CoInitialize" 错误
+            import ctypes
+            ctypes.windll.ole32.CoInitialize(None)
+            
             import win32com.client
             shell = win32com.client.Dispatch("WScript.Shell")
             shortcut = shell.CreateShortCut(shortcut_path)
@@ -979,12 +986,23 @@ class Page3(QWidget):
             logger.error(f"通过 win32com 创建快捷方式失败: {e}")
             try:
                 # 备用方案：使用 PowerShell 创建
+                # 增加 creationflags=subprocess.CREATE_NO_WINDOW 以隐藏弹出的黑窗口
                 ps_script = f'$s=(New-Object -ComObject WScript.Shell).CreateShortcut("{shortcut_path}");$s.TargetPath="{target_path}";$s.Save()'
-                import subprocess
-                subprocess.run(['powershell', '-Command', ps_script], capture_output=True)
+                subprocess.run(
+                    ['powershell', '-Command', ps_script], 
+                    capture_output=True,
+                    creationflags=subprocess.CREATE_NO_WINDOW
+                )
                 return True
-            except:
+            except Exception as ps_e:
+                logger.error(f"PowerShell 创建快捷方式也失败了: {ps_e}")
                 return False
+        finally:
+            # 释放 COM 资源
+            try:
+                ctypes.windll.ole32.CoUninitialize()
+            except:
+                pass
 
 
 class NetworkWorker(QObject):
