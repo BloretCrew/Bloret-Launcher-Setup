@@ -75,7 +75,7 @@ jobs:
           --windows-icon-from-ico=bloret.ico `
           --assume-yes-for-downloads `
           --output-dir=dist `
-          --windows-uac-admin `
+          # --windows-uac-admin `
           --company-name="Bloret Team" `
           --product-name="Bloret Launcher Setup" `
           --file-version=$TAG_VERSION `
@@ -91,7 +91,7 @@ jobs:
         name: Bloret-Launcher-Installer
         path: dist/installer.exe
         
-Upload-To-Release:
+  Upload-To-Release:
     # 只有当事件类型确实是 release，且不是手动触发时才运行
     if: github.event_name == 'release' && github.event_name != 'workflow_dispatch'
     needs: [Build-Installer]

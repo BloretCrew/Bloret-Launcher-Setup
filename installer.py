@@ -43,7 +43,7 @@ try:
                                 ProgressBar, StateToolTip, InfoBar, InfoBarPosition,
                                 LargeTitleLabel, TitleLabel, BodyLabel, StrongBodyLabel,
                                 SmoothScrollArea, CardWidget, RadioButton, LineEdit,
-                                CheckBox)
+                                CheckBox, CaptionLabel)
     QFLUENT_AVAILABLE = True
 except ImportError:
     QFLUENT_AVAILABLE = False
@@ -246,7 +246,10 @@ class Page2_1(QWidget):
         self.custom_path_edit.setPlaceholderText("选择自定义安装路径...")
         self.custom_path_edit.setEnabled(False)
         custom_layout.addWidget(self.custom_path_edit)
-        
+
+        self.custom_tip_label = CaptionLabel()
+        self.custom_tip_label.setText("若要安装在需要管理员权限的文件夹中，请退出 Bloret Launcher Setup 并右键选择以管理员身份运行，\n然后再选择需要管理员权限的文件夹\nBloret Launcher 不建议安装在需要管理员权限的文件夹中，这可能会导致一些意外，\n如果您安装在需要管理员权限的文件夹中，遇到问题请不要提交。")
+
         # 浏览按钮
         self.browse_button = PushButton("选择文件夹")
         self.browse_button.setEnabled(False)
@@ -254,6 +257,8 @@ class Page2_1(QWidget):
         custom_layout.addWidget(self.browse_button)
         
         path_layout.addLayout(custom_layout)
+        # CaptionLabel 是一个控件，必须使用 addWidget 而不是 addLayout
+        path_layout.addWidget(self.custom_tip_label)
         
         # 连接单选按钮信号
         self.appdata_radio.toggled.connect(self.on_radio_changed)
@@ -1281,12 +1286,12 @@ class BloretInstaller(QMainWindow):
             pass
         
         # 尝试设置窗口图标
-        try:
-            icon_path = "ui/bloret.ico"
-            if os.path.exists(icon_path):
-                self.setWindowIcon(QIcon(icon_path))
-        except:
-            pass
+        # try:
+        #     icon_path = "ui/bloret.ico"
+        #     if os.path.exists(icon_path):
+        #         self.setWindowIcon(QIcon(icon_path))
+        # except:
+        #     pass
             
         self.resize(700, 452)
         
