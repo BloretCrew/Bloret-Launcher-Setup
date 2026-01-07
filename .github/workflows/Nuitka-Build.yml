@@ -48,7 +48,7 @@ jobs:
     
     - name: 使用 Nuitka 打包安装向导
       run: |
-        python -m nuitka --onefile --disable-console --assume-yes-for-downloads --output-dir=dist installer.py
+        python -m nuitka --onefile --standalone --disable-console --enable-plugin=pyqt5 --include-qt-plugins=platforms --assume-yes-for-downloads --output-dir=dist installer.py
       shell: pwsh
 
     - name: 上传安装向导构建产物
