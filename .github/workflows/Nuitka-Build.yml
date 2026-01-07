@@ -91,8 +91,9 @@ jobs:
         name: Bloret-Launcher-Installer
         path: dist/installer.exe
         
-  Upload-To-Release:
-    if: github.event_name == 'release'
+Upload-To-Release:
+    # 只有当事件类型确实是 release，且不是手动触发时才运行
+    if: github.event_name == 'release' && github.event_name != 'workflow_dispatch'
     needs: [Build-Installer]
     runs-on: ubuntu-latest
     steps:
