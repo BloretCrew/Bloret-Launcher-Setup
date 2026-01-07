@@ -11,7 +11,7 @@ import logging
 import time
 from pathlib import Path
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QWidget, 
-                           QStackedWidget, QHBoxLayout, QLabel)
+                           QStackedWidget, QHBoxLayout, QLabel, QFileDialog)
 from PyQt5.QtCore import Qt, QPropertyAnimation, QRect, pyqtSignal, QThread, QObject, QTimer
 from PyQt5.QtGui import QIcon, QPixmap, QFont, QColor, QPalette
 from PyQt5 import uic
@@ -45,52 +45,946 @@ except ImportError:
     from PyQt5.QtWidgets import (QPushButton, QProgressBar, QLabel, QScrollArea, 
                                QFrame, QRadioButton, QLineEdit, QCheckBox)
 
-# 页面类
-try:
-    from page1 import Page1
-    from page2_1 import Page2_1
-    from page2_2 import Page2_2
-    from page3 import Page3
-except ImportError:
-    # 如果页面模块不存在，创建简单的后备页面
-    class Page1(QWidget):
-        def __init__(self, parent=None):
-            super().__init__(parent)
-            layout = QVBoxLayout()
-            label = QLabel("欢迎使用 Bloret Launcher 安装向导")
-            label.setAlignment(Qt.AlignCenter)
-            font = QFont()
-            font.setPointSize(16)
-            label.setFont(font)
-            layout.addWidget(label)
-            self.setLayout(layout)
+# 页面类（已合并 page1.py / page2_1.py / page2_2.py / page3.py）
+class Page1(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent = parent
+        self.initUI()
+        
+    def initUI(self):
+        # 创建主布局
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(30, 30, 30, 30)
+        main_layout.setSpacing(20)
+        
+        # 创建滚动区域
+        scroll_area = SmoothScrollArea()
+        scroll_area.setStyleSheet("background: transparent; border: none")
+        scroll_widget = QWidget()
+        scroll_layout = QVBoxLayout(scroll_widget)
+        scroll_layout.setContentsMargins(0, 0, 0, 0)
+        scroll_layout.setSpacing(20)
+        
+        # 添加顶部间距
+        scroll_layout.addSpacing(40)
+        
+        # 创建标题区域
+        header_layout = QHBoxLayout()
+        header_layout.setSpacing(20)
+        
+        # Logo
+        logo_label = StrongBodyLabel()
+        logo_label.setFixedSize(100, 100)
+        logo_label.setScaledContents(True)
+        
+        # 尝试加载 Logo
+        try:
+            pixmap = QPixmap("ui/bloret.png")
+            if not pixmap.isNull():
+                logo_label.setPixmap(pixmap)
+        except:
+            logo_label.setText("LOGO")
+            logo_label.setAlignment(Qt.AlignCenter)
+        
+        header_layout.addWidget(logo_label)
+        
+        # 标题和描述
+        title_layout = QVBoxLayout()
+        title_layout.setSpacing(10)
+        
+        # 主标题
+        main_title = LargeTitleLabel("Bloret Launcher")
+        title_layout.addWidget(main_title)
+        
+        # 副标题
+        subtitle = SubtitleLabel("Conveniently manage your Minecraft, conveniently play Bloret.\n便捷地管理你的 Minecraft，便捷地游玩 Bloret。")
+        subtitle.setWordWrap(True)
+        title_layout.addWidget(subtitle)
+        
+        # 安装信息
+        info_layout = QHBoxLayout()
+        info_layout.setSpacing(5)
+        
+        info_label = BodyLabel("将安装 / About to install :")
+        app_label = StrongBodyLabel("Bloret Launcher")
+        self.version_label = StrongBodyLabel("25.0")  # 改为实例变量
+        
+        info_layout.addWidget(info_label)
+        info_layout.addWidget(app_label)
+        info_layout.addWidget(self.version_label)
+        info_layout.addStretch()
+        
+        title_layout.addLayout(info_layout)
+        header_layout.addLayout(title_layout)
+        header_layout.addStretch()
+        
+        scroll_layout.addLayout(header_layout)
+        scroll_layout.addStretch()
+        
+        scroll_area.setWidget(scroll_widget)
+        main_layout.addWidget(scroll_area)
+        
+        # 底部按钮区域
+        button_layout = QHBoxLayout()
+        button_layout.setSpacing(15)
+        button_layout.addStretch()
+        
+        # 自定义安装按钮
+        self.custom_installation_button = PushButton("自定义安装 / Custom Installation")
+        self.custom_installation_button.setMinimumWidth(200)
+        button_layout.addWidget(self.custom_installation_button)
+        
+        # 快速安装按钮
+        self.quick_install_button = PrimaryPushButton("快速安装 / Quick Installation")
+        self.quick_install_button.setMinimumWidth(350)
+        button_layout.addWidget(self.quick_install_button)
+        
+        main_layout.addLayout(button_layout)
+        
+        self.setLayout(main_layout)
+        
+        # 设置样式
+        self.setStyleSheet("""
+            Page1 {
+                background-color: transparent;
+            }
+        """)
+    
+    def update_version(self, version):
+        """更新版本信息显示"""
+        self.version_label.setText(version)
+    
+    def apply_theme(self, is_dark=None):
+        """应用主题到页面"""
+        if is_dark is None:
+            from installer import is_dark_theme
+            is_dark = is_dark_theme()
+        
+        # 页面已经使用QFluentWidgets组件，它们会自动跟随主题
+        # 这里可以添加额外的主题特定样式调整
+        if is_dark:
+            self.setStyleSheet("""
+                Page1 {
+                    background-color: transparent;
+                }
+            """)
+        else:
+            self.setStyleSheet("""
+                Page1 {
+                    background-color: transparent;
+                }
+            """)
 
-    class Page2_1(QWidget):
-        def __init__(self, parent=None):
-            super().__init__(parent)
-            layout = QVBoxLayout()
-            label = QLabel("选择安装路径")
-            label.setAlignment(Qt.AlignCenter)
-            layout.addWidget(label)
-            self.setLayout(layout)
 
-    class Page2_2(QWidget):
-        def __init__(self, parent=None):
-            super().__init__(parent)
-            layout = QVBoxLayout()
-            label = QLabel("选择附加选项")
-            label.setAlignment(Qt.AlignCenter)
-            layout.addWidget(label)
-            self.setLayout(layout)
+class Page2_1(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent = parent
+        self.initUI()
+        
+    def initUI(self):
+        # 创建主布局
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(30, 30, 30, 30)
+        main_layout.setSpacing(20)
+        
+        # 创建滚动区域
+        scroll_area = SmoothScrollArea()
+        scroll_area.setStyleSheet("background: transparent; border: none")
+        scroll_widget = QWidget()
+        scroll_layout = QVBoxLayout(scroll_widget)
+        scroll_layout.setContentsMargins(0, 0, 0, 0)
+        scroll_layout.setSpacing(20)
+        
+        # 添加顶部间距
+        scroll_layout.addSpacing(40)
+        
+        # 标题
+        title = TitleLabel("你想要将 Bloret Launcher 安装在哪里？\nWhere do you want to install the Bloret Launcher?")
+        title.setWordWrap(True)
+        scroll_layout.addWidget(title)
+        
+        # 安装路径选择卡片
+        path_card = CardWidget()
+        path_layout = QVBoxLayout(path_card)
+        path_layout.setSpacing(15)
+        
+        # 卡片标题
+        card_title = SubtitleLabel("选择安装位置 / Choose installation location")
+        path_layout.addWidget(card_title)
+        
+        # 默认路径选项
+        self.appdata_radio = RadioButton()
+        default_path = os.path.expandvars(r'C:\Users\%USERNAME%\AppData\Roaming\Bloret-Launcher\Bloret-Launcher')
+        self.appdata_radio.setText(default_path)
+        self.appdata_radio.setChecked(True)
+        path_layout.addWidget(self.appdata_radio)
+        
+        # 自定义路径选项
+        custom_layout = QHBoxLayout()
+        custom_layout.setSpacing(10)
+        
+        self.custom_radio = RadioButton()
+        self.custom_radio.setText("")
+        custom_layout.addWidget(self.custom_radio)
+        
+        # 自定义路径输入框
+        self.custom_path_edit = LineEdit()
+        self.custom_path_edit.setPlaceholderText("选择自定义安装路径...")
+        self.custom_path_edit.setEnabled(False)
+        custom_layout.addWidget(self.custom_path_edit)
+        
+        # 浏览按钮
+        self.browse_button = PushButton("选择文件夹")
+        self.browse_button.setEnabled(False)
+        self.browse_button.clicked.connect(self.browse_folder)
+        custom_layout.addWidget(self.browse_button)
+        
+        path_layout.addLayout(custom_layout)
+        
+        # 连接单选按钮信号
+        self.appdata_radio.toggled.connect(self.on_radio_changed)
+        self.custom_radio.toggled.connect(self.on_radio_changed)
+        
+        scroll_layout.addWidget(path_card)
+        scroll_layout.addStretch()
+        
+        scroll_area.setWidget(scroll_widget)
+        main_layout.addWidget(scroll_area)
+        
+        # 底部按钮区域
+        button_layout = QHBoxLayout()
+        button_layout.setSpacing(15)
+        button_layout.addStretch()
+        
+        # 下一步按钮
+        self.next_button = PrimaryPushButton("下一步 / Next")
+        self.next_button.setMinimumWidth(350)
+        button_layout.addWidget(self.next_button)
+        
+        main_layout.addLayout(button_layout)
+        
+        self.setLayout(main_layout)
+        
+        # 设置样式
+        self.setStyleSheet("""
+            Page2_1 {
+                background-color: transparent;
+            }
+        """)
+        
+    def on_radio_changed(self):
+        """处理单选按钮状态变化"""
+        if self.custom_radio.isChecked():
+            self.custom_path_edit.setEnabled(True)
+            self.browse_button.setEnabled(True)
+        else:
+            self.custom_path_edit.setEnabled(False)
+            self.browse_button.setEnabled(False)
+            
+    def browse_folder(self):
+        """浏览文件夹"""
+        folder = QFileDialog.getExistingDirectory(
+            self,
+            "选择安装路径",
+            os.path.expanduser("~"),
+            QFileDialog.ShowDirsOnly
+        )
+        
+        if folder:
+            self.custom_path_edit.setText(folder)
+            
+    def get_install_path(self):
+        """获取选择的安装路径"""
+        if self.appdata_radio.isChecked():
+            return os.path.expandvars(r'%APPDATA%\Bloret-Launcher\Bloret-Launcher')
+        else:
+            return self.custom_path_edit.text()
+    
+    def apply_theme(self, is_dark=None):
+        """应用主题到页面"""
+        if is_dark is None:
+            from installer import is_dark_theme
+            is_dark = is_dark_theme()
+        
+        # 页面已经使用QFluentWidgets组件，它们会自动跟随主题
+        # 这里可以添加额外的主题特定样式调整
+        if is_dark:
+            self.setStyleSheet("""
+                Page2_1 {
+                    background-color: transparent;
+                }
+            """)
+        else:
+            self.setStyleSheet("""
+                Page2_1 {
+                    background-color: transparent;
+                }
+            """)
 
-    class Page3(QWidget):
-        def __init__(self, parent=None):
-            super().__init__(parent)
-            layout = QVBoxLayout()
-            label = QLabel("正在安装...")
-            label.setAlignment(Qt.AlignCenter)
-            layout.addWidget(label)
-            self.setLayout(layout)
+
+class Page2_2(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent = parent
+        self.initUI()
+        
+    def initUI(self):
+        # 创建主布局
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(30, 30, 30, 30)
+        main_layout.setSpacing(20)
+        
+        # 创建滚动区域
+        scroll_area = SmoothScrollArea()
+        scroll_area.setStyleSheet("background: transparent; border: none")
+        scroll_widget = QWidget()
+        scroll_layout = QVBoxLayout(scroll_widget)
+        scroll_layout.setContentsMargins(0, 0, 0, 0)
+        scroll_layout.setSpacing(20)
+        
+        # 添加顶部间距
+        scroll_layout.addSpacing(40)
+        
+        # 标题
+        title = TitleLabel("还需要其他项目吗？\nDo you need anything else?")
+        title.setWordWrap(True)
+        scroll_layout.addWidget(title)
+        
+        # 附加选项卡片
+        options_card = CardWidget()
+        options_layout = QVBoxLayout(options_card)
+        options_layout.setSpacing(15)
+        
+        # 卡片标题
+        card_title = SubtitleLabel("添加附加项目 / Add additional items")
+        options_layout.addWidget(card_title)
+        
+        # 桌面快捷方式选项
+        self.desktop_shortcut_checkbox = CheckBox("添加桌面快捷方式 / Add desktop shortcut")
+        options_layout.addWidget(self.desktop_shortcut_checkbox)
+        
+        # 启动菜单项选项
+        self.start_menu_checkbox = CheckBox("添加启动菜单项 Bloret Launcher / Add startup menu item Bloret Launcher")
+        options_layout.addWidget(self.start_menu_checkbox)
+        
+        # 设置默认状态
+        self.desktop_shortcut_checkbox.setChecked(True)
+        self.start_menu_checkbox.setChecked(True)
+        
+        scroll_layout.addWidget(options_card)
+        scroll_layout.addStretch()
+        
+        scroll_area.setWidget(scroll_widget)
+        main_layout.addWidget(scroll_area)
+        
+        # 底部按钮区域
+        button_layout = QHBoxLayout()
+        button_layout.setSpacing(15)
+        button_layout.addStretch()
+        
+        # 下一步按钮
+        self.next_button = PrimaryPushButton("下一步 / Next")
+        self.next_button.setMinimumWidth(350)
+        button_layout.addWidget(self.next_button)
+        
+        main_layout.addLayout(button_layout)
+        
+        self.setLayout(main_layout)
+        
+        # 设置样式
+        self.setStyleSheet("""
+            Page2_2 {
+                background-color: transparent;
+            }
+        """)
+        
+    def get_options(self):
+        """获取用户选择的附加选项"""
+        return {
+            'create_desktop_shortcut': self.desktop_shortcut_checkbox.isChecked(),
+            'create_start_menu_item': self.start_menu_checkbox.isChecked()
+        }
+    
+    def apply_theme(self, is_dark=None):
+        """应用主题到页面"""
+        if is_dark is None:
+            from installer import is_dark_theme
+            is_dark = is_dark_theme()
+        
+        # 页面已经使用QFluentWidgets组件，它们会自动跟随主题
+        # 这里可以添加额外的主题特定样式调整
+        if is_dark:
+            self.setStyleSheet("""
+                Page2_2 {
+                    background-color: transparent;
+                }
+            """)
+        else:
+            self.setStyleSheet("""
+                Page2_2 {
+                    background-color: transparent;
+                }
+            """)
+
+
+# Page3 内容（功能较多，来源于 page3.py）
+logger = logging.getLogger(__name__)
+
+
+class Page3(QWidget):
+    install_progress = pyqtSignal(int)
+    install_complete = pyqtSignal()
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent = parent
+        self.install_config = {}
+        self.initUI()
+        
+    def initUI(self):
+        # 创建主布局
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(30, 30, 30, 30)
+        main_layout.setSpacing(20)
+        
+        # 创建滚动区域
+        scroll_area = SmoothScrollArea()
+        scroll_area.setStyleSheet("background: transparent; border: none")
+        scroll_widget = QWidget()
+        scroll_layout = QVBoxLayout(scroll_widget)
+        scroll_layout.setContentsMargins(0, 0, 0, 0)
+        scroll_layout.setSpacing(20)
+        
+        # 标题
+        self.title_label = TitleLabel("正在安装 Bloret Launcher\nInstalling Bloret Launcher")
+        scroll_layout.addWidget(self.title_label)
+        
+        # 进度条区域
+        progress_layout = QHBoxLayout()
+        progress_layout.setSpacing(10)
+        
+        self.progress_bar = ProgressBar()
+        self.progress_bar.setRange(0, 100)
+        progress_layout.addWidget(self.progress_bar)
+        
+        self.progress_label = StrongBodyLabel("0%")
+        progress_layout.addWidget(self.progress_label)
+        
+        scroll_layout.addLayout(progress_layout)
+        
+        # 添加间距
+        scroll_layout.addSpacing(40)
+        
+        # 介绍卡片
+        intro_card = CardWidget()
+        intro_layout = QVBoxLayout(intro_card)
+        intro_layout.setSpacing(15)
+        
+        # 卡片标题
+        card_title = SubtitleLabel("来认识一下 Bloret Launcher\nCome and get to know Bloret Launcher")
+        intro_layout.addWidget(card_title)
+        
+        # 图片展示区域
+        image_layout = QHBoxLayout()
+        image_layout.addStretch()
+        
+        # 尝试加载图片
+        self.image_label = StrongBodyLabel()
+        self.image_label.setFixedSize(382, 297)
+        self.image_label.setScaledContents(True)
+        
+        try:
+            pixmap = QPixmap("ui/BLroundHome.png")
+            if not pixmap.isNull():
+                self.image_label.setPixmap(pixmap)
+            else:
+                self.image_label.setText("图片加载失败")
+                self.image_label.setAlignment(Qt.AlignCenter)
+        except:
+            self.image_label.setText("图片加载失败")
+            self.image_label.setAlignment(Qt.AlignCenter)
+        
+        image_layout.addWidget(self.image_label)
+        image_layout.addStretch()
+        
+        intro_layout.addLayout(image_layout)
+        
+        scroll_layout.addWidget(intro_card)
+        scroll_layout.addStretch()
+        
+        scroll_area.setWidget(scroll_widget)
+        main_layout.addWidget(scroll_area)
+        
+        # 底部按钮区域
+        self.button_layout = QHBoxLayout()
+        self.button_layout.setSpacing(15)
+        self.button_layout.addStretch()
+        
+        # 完成按钮（初始隐藏）
+        self.finish_button = PrimaryPushButton("完成 / Finish")
+        self.finish_button.setMinimumWidth(180)
+        self.finish_button.clicked.connect(self.on_finish_clicked)
+        self.finish_button.setVisible(False)
+        
+        # # 完成并打开按钮（初始隐藏）
+        # self.finish_open_button = PrimaryPushButton("完成并打开 / Finish and Open")
+        # self.finish_open_button.setMinimumWidth(280)
+        # self.finish_open_button.clicked.connect(self.on_finish_and_open_clicked)
+        # self.finish_open_button.setVisible(False)
+        
+        self.button_layout.addWidget(self.finish_button)
+        # self.button_layout.addWidget(self.finish_open_button)
+        
+        main_layout.addLayout(self.button_layout)
+        
+        self.setLayout(main_layout)
+        
+        # 设置样式
+        self.setStyleSheet("""
+            Page3 {
+                background-color: transparent;
+            }
+        """)
+        
+        # 连接信号
+        self.install_progress.connect(self.update_progress)
+        self.install_complete.connect(self.on_install_complete)
+        
+    def start_installation(self, install_config):
+        """开始安装"""
+        logger.info(f"Page3: 开始安装流程")
+        logger.info(f"安装配置: {install_config}")
+        self.install_config = install_config
+        self.progress_bar.setValue(0)
+        self.progress_label.setText("0%")
+        
+        # 在后台线程中执行安装
+        logger.info(f"创建安装线程")
+        self.install_thread = threading.Thread(target=self.simulate_installation)
+        self.install_thread.daemon = True
+        self.install_thread.start()
+        logger.info(f"安装线程已启动")
+        
+    def simulate_installation(self):
+        """模拟安装过程"""
+        logger.info(f"模拟安装过程开始")
+        try:
+            # 检查是否有下载的文件
+            downloaded_file = self.install_config.get('downloaded_file', '')
+            logger.info(f"检查下载的文件: {downloaded_file}")
+            
+            if downloaded_file and os.path.exists(downloaded_file):
+                logger.info(f"找到下载的文件，执行实际安装: {downloaded_file}")
+                # 如果有下载的文件，执行实际安装
+                self.install_from_downloaded_file(downloaded_file)
+            else:
+                logger.info(f"未找到下载的文件，执行模拟安装")
+                # 否则模拟安装
+                self.simulate_install_steps()
+                
+        except Exception as e:
+            logger.error(f"安装过程失败: {e}")
+            logger.error(traceback.format_exc())
+            # 如果安装失败，显示错误信息
+            QTimer.singleShot(0, lambda: self.show_install_error(str(e)))
+    
+    def install_from_downloaded_file(self, file_path):
+        """从下载的文件安装"""
+        temp_extract_dir = None
+        try:
+            import subprocess
+            import shutil
+            import zipfile
+            
+            # 安装步骤
+            steps = [
+                ("正在准备安装环境...", 10),
+                ("正在验证下载文件...", 20),
+                ("正在解压安装文件...", 40),
+                ("正在复制文件到目标目录...", 60),
+                ("正在创建快捷方式...", 80),
+                ("正在完成安装...", 95),
+                ("安装完成！", 100)
+            ]
+            
+            # 获取安装路径
+            install_path = self.install_config.get('install_path', '')
+            
+            for step_text, progress in steps:
+                self.install_progress.emit(progress)
+                
+                if progress == 40:
+                    # 解压文件（如果是zip文件）
+                    logger.info(f"进度40%: 处理文件 {file_path}")
+                    if file_path.endswith('.zip'):
+                        logger.info(f"检测到zip文件，开始解压: {file_path}")
+                        # 创建临时解压目录
+                        temp_extract_dir = os.path.join(os.path.dirname(file_path), 'bloret_temp')
+                        logger.info(f"创建临时解压目录: {temp_extract_dir}")
+                        os.makedirs(temp_extract_dir, exist_ok=True)
+                        logger.info(f"临时解压目录创建成功: {temp_extract_dir}")
+                        
+                        # 解压zip文件
+                        logger.info(f"开始解压zip文件到: {temp_extract_dir}")
+                        with zipfile.ZipFile(file_path, 'r') as zip_ref:
+                            zip_ref.extractall(temp_extract_dir)
+                        logger.info(f"zip文件解压完成")
+                        
+                        # 查找解压后的安装程序
+                        logger.info(f"在解压目录中查找安装程序: {temp_extract_dir}")
+                        installer_exe = self.find_installer_exe(temp_extract_dir)
+                        logger.info(f"找到的安装程序: {installer_exe}")
+                        if installer_exe:
+                            file_path = installer_exe  # 更新为解压后的安装程序路径
+                            logger.info(f"更新安装程序路径为: {file_path}")
+                        else:
+                            raise Exception("在zip文件中未找到安装程序")
+                    else:
+                        logger.info(f"不是zip文件，直接使用原路径: {file_path}")
+                    
+                    time.sleep(2)
+                elif progress == 60:
+                    # 文件复制
+                    logger.info(f"开始复制文件到安装目录: {install_path}")
+                    try:
+                        # 创建安装目录（如果不存在）
+                        os.makedirs(install_path, exist_ok=True)
+                        
+                        # 如果是从解压目录复制文件
+                        if temp_extract_dir and os.path.exists(temp_extract_dir):
+                            logger.info(f"从解压目录复制文件: {temp_extract_dir} -> {install_path}")
+                            import shutil
+                            
+                            # 复制所有文件和子目录，如果文件已存在则覆盖
+                            for root, dirs, files in os.walk(temp_extract_dir):
+                                # 计算相对路径
+                                rel_path = os.path.relpath(root, temp_extract_dir)
+                                if rel_path == '.':
+                                    target_dir = install_path
+                                else:
+                                    target_dir = os.path.join(install_path, rel_path)
+                                
+                                # 创建目标目录
+                                os.makedirs(target_dir, exist_ok=True)
+                                
+                                # 复制文件
+                                for file in files:
+                                    src_file = os.path.join(root, file)
+                                    dst_file = os.path.join(target_dir, file)
+                                    
+                                    # 如果目标文件已存在，先删除再复制（覆盖）
+                                    if os.path.exists(dst_file):
+                                        logger.info(f"文件已存在，准备覆盖: {dst_file}")
+                                        os.remove(dst_file)
+                                    
+                                    shutil.copy2(src_file, dst_file)
+                                    logger.debug(f"复制文件: {src_file} -> {dst_file}")
+                            
+                            logger.info(f"文件复制完成，覆盖模式已启用")
+                        else:
+                            logger.warning(f"没有找到解压目录，跳过文件复制")
+                            
+                    except Exception as e:
+                        logger.error(f"文件复制失败: {e}")
+                        raise
+                    
+                    time.sleep(1)
+                elif progress == 80:
+                    # 创建快捷方式
+                    self.create_shortcuts()
+                    time.sleep(0.5)
+                else:
+                    time.sleep(0.3)
+                
+                if progress == 100:
+                    # 安装完成 - 文件已经通过复制方式安装完成
+                    logger.info(f"安装完成！文件已成功复制到: {install_path}")
+                    logger.info(f"安装模式: 直接文件复制（覆盖模式已启用）")
+                    self.install_complete.emit()
+                    
+        except Exception as e:
+            logger.error(f"安装过程捕获异常: {e}")
+            logger.error(traceback.format_exc())
+            self.show_install_error(f"安装失败: {str(e)}")
+        finally:
+            # 清理临时文件 - 确保传递正确的参数
+            logger.info(f"finally块: 准备清理临时文件")
+            logger.info(f"finally块: file_path = {file_path}")
+            logger.info(f"finally块: temp_extract_dir = {temp_extract_dir}")
+            
+            # 确定要清理的下载文件路径
+            cleanup_file = None
+            if 'downloaded_file' in self.install_config:
+                cleanup_file = self.install_config['downloaded_file']
+                logger.info(f"使用安装配置中的下载文件: {cleanup_file}")
+            elif file_path and file_path.endswith('.zip'):
+                cleanup_file = file_path
+                logger.info(f"使用当前的zip文件路径: {cleanup_file}")
+            
+            self.cleanup_temp_files(cleanup_file, temp_extract_dir)
+    
+    def find_installer_exe(self, extract_dir):
+        """在解压目录中查找安装程序"""
+        try:
+            logger.info(f"开始在目录中查找安装程序: {extract_dir}")
+            # 常见的安装程序名称
+            installer_names = ['setup.exe', 'install.exe', 'Bloret-Launcher-Setup.exe', 
+                             'Bloret Launcher Setup.exe', 'BloretLauncherSetup.exe']
+            
+            exe_files = []
+
+            # 遍历解压目录
+            logger.debug(f"遍历解压目录: {extract_dir}")
+            for root, dirs, files in os.walk(extract_dir):
+                for file in files:
+                    file_lower = file.lower()
+                    if file_lower.endswith('.exe'):
+                        full_path = os.path.join(root, file)
+                        # 检查是否匹配特定名称
+                        if any(name in file_lower for name in [n.lower() for n in installer_names]):
+                            logger.info(f"找到匹配名称的安装程序: {full_path}")
+                            return full_path
+                        # 收集所有exe文件
+                        exe_files.append(full_path)
+            
+            # 如果没找到特定名称的exe，从收集的exe中寻找最大的文件（通常是主程序）
+            if exe_files:
+                logger.debug(f"未找到特定名称安装程序，正在分析 {len(exe_files)} 个exe文件...")
+                # 按文件大小降序排序
+                exe_files.sort(key=lambda x: os.path.getsize(x), reverse=True)
+                largest_exe = exe_files[0]
+                logger.info(f"选择最大的exe文件作为安装程序: {largest_exe} (Size: {os.path.getsize(largest_exe)} bytes)")
+                return largest_exe
+            
+            logger.warning(f"在目录 {extract_dir} 中未找到任何exe文件")
+            return None
+        except Exception as e:
+            logger.error(f"查找安装程序失败: {e}")
+            logger.error(traceback.format_exc())
+            return None
+    
+    def cleanup_temp_files(self, downloaded_file, temp_extract_dir):
+        """清理临时文件"""
+        try:
+            logger.info(f"开始清理临时文件...")
+            logger.info(f"下载文件: {downloaded_file}")
+            logger.info(f"临时解压目录: {temp_extract_dir}")
+            
+            # 清理下载的zip文件
+            if downloaded_file and downloaded_file.endswith('.zip'):
+                logger.debug(f"检查下载的zip文件是否存在: {os.path.exists(downloaded_file)}")
+                if os.path.exists(downloaded_file):
+                    logger.info(f"正在删除下载的zip文件: {downloaded_file}")
+                    os.remove(downloaded_file)
+                    logger.info(f"已删除下载的zip文件: {downloaded_file}")
+                else:
+                    logger.warning(f"下载的zip文件不存在: {downloaded_file}")
+            else:
+                logger.debug(f"无需清理下载文件: {downloaded_file}")
+            
+            # 清理临时解压目录
+            if temp_extract_dir:
+                logger.debug(f"检查临时解压目录是否存在: {os.path.exists(temp_extract_dir)}")
+                if os.path.exists(temp_extract_dir):
+                    logger.info(f"正在清理临时解压目录: {temp_extract_dir}")
+                    import shutil
+                    shutil.rmtree(temp_extract_dir)
+                    logger.info(f"已清理临时解压目录: {temp_extract_dir}")
+                else:
+                    logger.warning(f"临时解压目录不存在: {temp_extract_dir}")
+            else:
+                logger.debug(f"无需清理临时解压目录")
+                
+        except Exception as e:
+            logger.error(f"清理临时文件失败: {e}")
+            logger.error(traceback.format_exc())
+    
+    def simulate_install_steps(self):
+        """模拟安装步骤"""
+        logger.info(f"开始模拟安装步骤")
+        
+        steps = [
+            ("正在创建安装目录...", 10),
+            ("正在复制文件...", 30),
+            ("正在注册组件...", 50),
+            ("正在创建快捷方式...", 70),
+            ("正在完成安装...", 90),
+            ("安装完成！", 100)
+        ]
+        
+        for step_text, progress in steps:
+            logger.debug(f"模拟安装步骤: {step_text} (进度: {progress}%)")
+            self.install_progress.emit(progress)
+            time.sleep(0.5)
+            
+            if progress == 100:
+                logger.info(f"模拟安装步骤完成")
+                self.install_complete.emit()
+    
+    def create_shortcuts(self):
+        """创建快捷方式"""
+        logger.info(f"开始创建快捷方式")
+        
+        try:
+            install_path = self.install_config.get('install_path', '')
+            create_desktop = self.install_config.get('create_desktop_shortcut', False)
+            create_start_menu = self.install_config.get('create_start_menu_item', False)
+            
+            logger.info(f"安装路径: {install_path}")
+            logger.info(f"桌面快捷方式: {create_desktop}")
+            logger.info(f"开始菜单快捷方式: {create_start_menu}")
+            
+            if not install_path:
+                logger.warning("安装路径为空，无法创建快捷方式")
+                return
+                
+            # 直接使用固定的可执行文件名
+            exe_path = os.path.join(install_path, "Bloret-Launcher.exe")
+            if not os.path.exists(exe_path):
+                logger.error(f"在安装路径中未找到可执行文件: {exe_path}")
+                return
+                
+            logger.info(f"找到可执行文件: {exe_path}")
+            
+            # 获取应用名称（用于快捷方式名称）
+            app_name = self.get_app_name_from_path(exe_path)
+            logger.info(f"应用名称: {app_name}")
+            
+            shortcuts_created = []
+            
+            # 创建桌面快捷方式
+            if create_desktop:
+                desktop_path = self.get_desktop_path()
+                if desktop_path:
+                    shortcut_path = os.path.join(desktop_path, f"{app_name}.lnk")
+                    if self.create_windows_shortcut(exe_path, shortcut_path, app_name):
+                        shortcuts_created.append("桌面快捷方式")
+                        logger.info(f"桌面快捷方式创建成功: {shortcut_path}")
+                    else:
+                        logger.error("桌面快捷方式创建失败")
+                else:
+                    logger.error("无法获取桌面路径")
+            
+            # 创建开始菜单快捷方式
+            if create_start_menu:
+                start_menu_path = self.get_start_menu_path()
+                if start_menu_path:
+                    # 直接在Programs目录下创建快捷方式，不创建子文件夹
+                    shortcut_path = os.path.join(start_menu_path, f"{app_name}.lnk")
+                    if self.create_windows_shortcut(exe_path, shortcut_path, app_name):
+                        shortcuts_created.append("开始菜单快捷方式")
+                        logger.info(f"开始菜单快捷方式创建成功: {shortcut_path}")
+                    else:
+                        logger.error("开始菜单快捷方式创建失败")
+                else:
+                    logger.error("无法获取开始菜单路径")
+            
+            if shortcuts_created:
+                logger.info(f"快捷方式创建完成: {', '.join(shortcuts_created)}")
+            else:
+                logger.warning("未创建任何快捷方式")
+                
+        except Exception as e:
+            logger.error(f"创建快捷方式失败: {e}")
+            logger.error(traceback.format_exc())
+
+    def update_progress(self, value):
+        """更新进度条"""
+        if hasattr(self, 'progress_bar'):
+            self.progress_bar.setValue(value)
+        if hasattr(self, 'progress_label'):
+            self.progress_label.setText(f"{value}%")
+
+    def on_install_complete(self):
+        """安装完成时的UI更新"""
+        if hasattr(self, 'progress_bar'):
+            self.progress_bar.setValue(100)
+        if hasattr(self, 'progress_label'):
+            self.progress_label.setText("100%")
+        if hasattr(self, 'title_label'):
+            self.title_label.setText("安装完成\nInstallation Complete")
+        if hasattr(self, 'finish_button'):
+            self.finish_button.setVisible(True)
+
+    def on_finish_clicked(self):
+        """点击完成按钮"""
+        QApplication.quit()
+
+    def on_finish_and_open_clicked(self):
+        """点击完成并打开按钮"""
+        try:
+            install_path = self.install_config.get('install_path', '')
+            # 1. 展开环境变量（如 %APPDATA%）并获取绝对路径
+            abs_install_path = os.path.abspath(os.path.expandvars(install_path))
+            exe_path = os.path.join(abs_install_path, "Bloret-Launcher.exe")
+            
+            logger.info(f"准备启动程序: {exe_path}")
+            
+            if os.path.exists(exe_path):
+                # 2. 使用 os.startfile 启动。
+                # 这种方式在 Windows 上最稳妥，相当于“双击”，
+                # 自动脱离父进程独立运行，且不会与调试器的 creationflags 产生 [WinError 87] 冲突。
+                os.startfile(exe_path)
+                logger.info("程序启动指令已通过 Shell 发出")
+            else:
+                logger.error(f"无法启动程序，文件不存在: {exe_path}")
+                
+        except Exception as e:
+            logger.error(f"启动程序时发生异常: {e}")
+            logger.error(traceback.format_exc())
+        finally:
+            # 3. 稍微延迟一下退出，确保 Shell 指令已成功送达系统
+            QTimer.singleShot(200, QApplication.quit)
+
+    def on_install_complete(self):
+        """安装完成时的UI更新"""
+        if hasattr(self, 'progress_bar'):
+            self.progress_bar.setValue(100)
+        if hasattr(self, 'progress_label'):
+            self.progress_label.setText("100%")
+        if hasattr(self, 'title_label'):
+            self.title_label.setText("安装完成 / Installation Complete")
+        
+        # 显示两个按钮
+        self.finish_button.setVisible(True)
+        self.finish_open_button.setVisible(True)
+    
+    def get_app_name_from_path(self, exe_path):
+        """从路径获取应用名称"""
+        return os.path.splitext(os.path.basename(exe_path))[0]
+
+    def get_desktop_path(self):
+        """获取桌面路径"""
+        return os.path.join(os.path.expanduser("~"), "Desktop")
+
+    def get_start_menu_path(self):
+        """获取开始菜单程序路径"""
+        return os.path.join(os.environ.get('APPDATA', ''), r"Microsoft\Windows\Start Menu\Programs")
+
+    def create_windows_shortcut(self, target_path, shortcut_path, description):
+        """创建 Windows 快捷方式"""
+        try:
+            import win32com.client
+            shell = win32com.client.Dispatch("WScript.Shell")
+            shortcut = shell.CreateShortCut(shortcut_path)
+            shortcut.TargetPath = target_path
+            shortcut.WorkingDirectory = os.path.dirname(target_path)
+            shortcut.Description = description
+            shortcut.IconLocation = target_path
+            shortcut.save()
+            return True
+        except Exception as e:
+            logger.error(f"通过 win32com 创建快捷方式失败: {e}")
+            try:
+                # 备用方案：使用 PowerShell 创建
+                ps_script = f'$s=(New-Object -ComObject WScript.Shell).CreateShortcut("{shortcut_path}");$s.TargetPath="{target_path}";$s.Save()'
+                import subprocess
+                subprocess.run(['powershell', '-Command', ps_script], capture_output=True)
+                return True
+            except:
+                return False
 
 
 class NetworkWorker(QObject):
@@ -619,405 +1513,127 @@ class BloretInstaller(QMainWindow):
             pass
     
     def show_downloading_dialog(self):
-        """显示下载进度窗口 - 整合测试程序的成功实现"""
+        """显示下载进度窗口"""
         logger.info("开始显示下载进度窗口")
-        # 如果已经存在正在显示的下载对话框或正在创建中，则直接返回（避免重复弹窗）
-        try:
-            logger.debug("show_downloading_dialog 调用堆栈:\n%s", ''.join(traceback.format_stack(limit=10)))
-            # 使用锁序列化对话框创建，避免并发创建
-            with self._downloading_dialog_lock:
-                if getattr(self, '_downloading_dialog_opening', False):
-                    logger.info("下载对话框正在创建，跳过重复创建")
-                    return
-                if getattr(self, 'downloading_dialog', None) is not None and self.downloading_dialog.isVisible():
-                    logger.info("下载对话框已存在并可见，跳过创建")
-                    return
-                # 标记正在创建，防止并发创建两个对话框
-                self._downloading_dialog_opening = True
-        except Exception:
-            # 如果检查可见性失败，继续创建新的对话框
-            logger.exception('检查现有对话框时出错，继续创建新的对话框')
-        try:
-            # 在创建新对话框前，再次扫描顶层窗口以尝试复用已存在的下载对话框（防止外部触发重复创建）
-            try:
-                from PyQt5.QtWidgets import QApplication
-                for w in QApplication.topLevelWidgets():
-                    try:
-                        if getattr(w, 'windowTitle', None) and callable(w.windowTitle) and w.windowTitle() == "正在下载":
-                            logger.info("发现现存的下载对话框，复用该对话框")
-                            self.downloading_dialog = w
-                            if not self.downloading_dialog.isVisible():
-                                self.downloading_dialog.show()
-                                QApplication.processEvents()
-                            return
-                    except Exception:
-                        continue
-            except Exception:
-                logger.exception('扫描顶层窗口以复用对话框时出错')
-
-            # 使用现有的UI文件
-            ui_path = os.path.join(os.path.dirname(__file__), "ui", "downloading.ui")
-            logger.info(f"UI文件路径: {ui_path}")
-            logger.info(f"UI文件存在: {os.path.exists(ui_path)}")
-            
-            if os.path.exists(ui_path):
-                from PyQt5.QtWidgets import QDialog, QVBoxLayout, QProgressBar, QLabel
-                
-                # 导入QFluentWidgets组件（如果可用）
-                if QFLUENT_AVAILABLE:
-                    from qfluentwidgets import ProgressBar, BodyLabel
-                
-                self.downloading_dialog = QDialog(self)
-                self.downloading_dialog.setWindowTitle("正在下载")
-                self.downloading_dialog.setModal(True)
-                self.downloading_dialog.resize(400, 182)
-                
-                # 直接使用UI文件创建对话框
-                self.downloading_dialog = uic.loadUi(ui_path, self.downloading_dialog)
-                
-                # 获取进度条和标签引用 - 参考测试程序
-                # 为了可靠刷新，优先使用 PyQt5 的 QProgressBar/QLabel，替换掉 QFluentWidgets 的组件
-                if QFLUENT_AVAILABLE:
-                    # 先尝试找到 QFluentWidgets 的控件
-                    fluent_pb = self.downloading_dialog.findChild(ProgressBar, "ProgressBar")
-                    fluent_lbl = self.downloading_dialog.findChild(BodyLabel, "BodyLabel")
-                    from PyQt5.QtWidgets import QProgressBar, QLabel
-                    if fluent_pb is not None:
-                        try:
-                            parent = fluent_pb.parent()
-                            new_pb = QProgressBar(parent)
-                            new_pb.setObjectName('ProgressBar')
-                            new_pb.setRange(0, 100)
-                            new_pb.setValue(0)
-                            # 插入到父布局中，尽量保持位置
-                            playout = parent.layout() if parent is not None else None
-                            if playout is not None:
-                                idx = playout.indexOf(fluent_pb)
-                                playout.insertWidget(idx, new_pb)
-                            fluent_pb.hide()
-                            self.download_progress_bar = new_pb
-                        except Exception:
-                            logger.exception('替换 QFluent ProgressBar 失败，使用原始控件')
-                            self.download_progress_bar = fluent_pb
-                    else:
-                        # 没找到 fluent pb，尝试找标准控件
-                        self.download_progress_bar = self.downloading_dialog.findChild(QProgressBar, "ProgressBar")
-
-                    if fluent_lbl is not None:
-                        try:
-                            parent = fluent_lbl.parent()
-                            new_lbl = QLabel(parent)
-                            new_lbl.setObjectName('BodyLabel')
-                            new_lbl.setText('0%')
-                            playout = parent.layout() if parent is not None else None
-                            if playout is not None:
-                                idx = playout.indexOf(fluent_lbl)
-                                playout.insertWidget(idx + 1, new_lbl)
-                            fluent_lbl.hide()
-                            self.download_progress_label = new_lbl
-                        except Exception:
-                            logger.exception('替换 QFluent BodyLabel 失败，使用原始控件')
-                            self.download_progress_label = fluent_lbl
-                    else:
-                        self.download_progress_label = self.downloading_dialog.findChild(QLabel, "BodyLabel")
-                else:
-                    self.download_progress_bar = self.downloading_dialog.findChild(QProgressBar, "ProgressBar")
-                    self.download_progress_label = self.downloading_dialog.findChild(QLabel, "BodyLabel")
-                
-                logger.info(f"进度条: {self.download_progress_bar}")
-                logger.info(f"标签: {self.download_progress_label}")
-                
-                # 设置初始值
-                if self.download_progress_bar:
-                    try:
-                        self.download_progress_bar.setRange(0, 100)
-                        self.download_progress_bar.setValue(0)
-                    except Exception:
-                        logger.exception('设置进度条初始值失败')
-                if self.download_progress_label:
-                    try:
-                        self.download_progress_label.setText("0%")
-                    except Exception:
-                        logger.exception('设置进度标签初始文本失败')
-                
-                # 居中显示对话框
-                self.downloading_dialog.move(
-                    self.x() + (self.width() - self.downloading_dialog.width()) // 2,
-                    self.y() + (self.height() - self.downloading_dialog.height()) // 2
-                )
-                
-                self.downloading_dialog.show()
-                logger.info("下载进度窗口已显示")
-
-                # 强制刷新并调整布局以避免初始不可见的问题
-                try:
-                    QApplication.processEvents()
-                    self.downloading_dialog.adjustSize()
-                    self.downloading_dialog.updateGeometry()
-                    self.downloading_dialog.repaint()
-                except Exception:
-                    logger.exception('显示对话框后刷新/调整布局失败')
-                logger.info("UI强制刷新完成")
-
-            # Ensure there is always a usable progress bar and label (fallback)
-            try:
-                # 如果 UI 文件中未找到进度条或标签，优先将回退控件加入到对话框布局中
-                layout = None
-                try:
-                    layout = self.downloading_dialog.layout()
-                except Exception:
-                    layout = None
-
-                if not hasattr(self, 'download_progress_bar') or self.download_progress_bar is None:
-                    from PyQt5.QtWidgets import QProgressBar, QLabel
-                    pb = QProgressBar()
-                    pb.setObjectName('fallback_progress_bar')
-                    pb.setRange(0, 100)
-                    pb.setValue(0)
-                    if layout is not None:
-                        layout.addWidget(pb)
-                    else:
-                        pb.setParent(self.downloading_dialog)
-                    pb.show()
-                    self.download_progress_bar = pb
-
-                if not hasattr(self, 'download_progress_label') or self.download_progress_label is None:
-                    from PyQt5.QtWidgets import QLabel
-                    lbl = QLabel('0%')
-                    lbl.setObjectName('fallback_progress_label')
-                    if layout is not None:
-                        layout.addWidget(lbl)
-                    else:
-                        lbl.setParent(self.downloading_dialog)
-                    lbl.show()
-                    self.download_progress_label = lbl
-            except Exception:
-                logger.exception('创建回退进度控件失败')
-
-            # 如果 UI 文件不存在，则使用代码创建回退对话框（确保不会在已加载 UI 的情况下再次创建）
-            if not os.path.exists(ui_path):
-                # 如果已经存在可见的下载对话框，则跳过回退对话框的创建
-                try:
-                    if getattr(self, 'downloading_dialog', None) is not None and self.downloading_dialog.isVisible():
-                        logger.info('下载对话框已存在（回退创建被跳过）')
-                        return
-                except Exception:
-                    pass
-
-                try:
-                    from qfluentwidgets import ProgressBar, BodyLabel, SubtitleLabel, CardWidget
-                except Exception:
-                    ProgressBar = None
-                    BodyLabel = None
-                    SubtitleLabel = None
-                    CardWidget = None
-
-                from PyQt5.QtWidgets import QDialog, QVBoxLayout
-
-                self.downloading_dialog = QDialog(self)
-                self.downloading_dialog.setWindowTitle("正在下载")
-                self.downloading_dialog.setModal(True)  # 使用模态对话框，类似测试程序
-                self.downloading_dialog.resize(400, 182)
-                
-                # 创建下载进度界面，模仿UI文件的结构
-                main_layout = QVBoxLayout()
-                main_layout.setContentsMargins(12, 12, 12, 12)
-                main_layout.setSpacing(10)
-
-                # 创建卡片组件
-                if CardWidget is not None:
-                    card = CardWidget()
-                else:
-                    from PyQt5.QtWidgets import QFrame
-                    card = QFrame()
-                    card.setMinimumSize(0, 120)
-                    card.setFrameStyle(QFrame.Box)
-                    card.setStyleSheet("""
-                        QFrame { background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 10px; }
-                    """)
-
-                card_layout = QVBoxLayout()
-                card_layout.setContentsMargins(8, 8, 8, 8)
-                card_layout.setSpacing(8)
-
-                # 标题标签
-                if SubtitleLabel is not None:
-                    title_label = SubtitleLabel("资源仍在下载中 / The resource is still downloading")
-                else:
-                    from PyQt5.QtWidgets import QLabel
-                    title_label = QLabel("资源仍在下载中 / The resource is still downloading")
-                    title_label.setStyleSheet('font-weight: bold;')
-                title_label.setWordWrap(True)
-                card_layout.addWidget(title_label)
-
-                # 描述标签
-                if BodyLabel is not None:
-                    desc_label = BodyLabel("待资源文件下载完成后，安装将会开始 / The installation will begin once the resource files have finished downloading.")
-                else:
-                    from PyQt5.QtWidgets import QLabel
-                    desc_label = QLabel("待资源文件下载完成后，安装将会开始 / The installation will begin once the resource files have finished downloading.")
-                desc_label.setWordWrap(True)
-                desc_label.setObjectName('BodyLabel')
-                card_layout.addWidget(desc_label)
-
-                # 进度条（优先使用标准 QProgressBar 以确保视觉刷新可靠）
-                from PyQt5.QtWidgets import QProgressBar, QLabel, QSizePolicy
-                self.download_progress_bar = QProgressBar()
-                self.download_progress_bar.setObjectName('ProgressBar')
-                self.download_progress_bar.setMinimumHeight(14)
-                self.download_progress_bar.setRange(0, 100)
-                self.download_progress_bar.setValue(0)
-                self.download_progress_bar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-                card_layout.addWidget(self.download_progress_bar)
-                
-                # 状态标签
-                self.download_progress_label = QLabel('0%')
-                self.download_progress_label.setObjectName('BodyLabel')
-                self.download_progress_label.setAlignment(0x0004)  # Qt.AlignRight
-                card_layout.addWidget(self.download_progress_label)
-
-                card.setLayout(card_layout)
-                main_layout.addWidget(card)
-                
-                self.downloading_dialog.setLayout(main_layout)
-                
-                # 居中显示对话框
-                self.downloading_dialog.move(
-                    self.x() + (self.width() - self.downloading_dialog.width()) // 2,
-                    self.y() + (self.height() - self.downloading_dialog.height()) // 2
-                )
-                
-                self.downloading_dialog.show()
-                
-                # 强制刷新
-                QApplication.processEvents()
-            
-        except ImportError:
-            # 如果 QFluentWidgets 不可用，使用标准对话框
-            from PyQt5.QtWidgets import QDialog, QProgressBar, QLabel, QVBoxLayout, QFrame
-            
-            self.downloading_dialog = QDialog(self)
-            self.downloading_dialog.setWindowTitle("正在下载")
-            self.downloading_dialog.setModal(True)  # 使用模态对话框，类似测试程序
-            self.downloading_dialog.resize(420, 200)
-            
-            # 创建主布局
-            main_layout = QVBoxLayout()
-            main_layout.setContentsMargins(12, 12, 12, 12)
-            main_layout.setSpacing(10)
-            
-            # 创建卡片样式的容器
-            card = QFrame()
-            card.setMinimumSize(0, 120)
-            card.setFrameStyle(QFrame.Box)
-            card.setStyleSheet("""
-                QFrame { background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 10px; }
-            """)
-            
-            card_layout = QVBoxLayout()
-            card_layout.setContentsMargins(8, 8, 8, 8)
-            card_layout.setSpacing(8)
-            
-            # 标题标签
-            title_label = QLabel("资源仍在下载中 / The resource is still downloading")
-            title_label.setWordWrap(True)
-            title_label.setStyleSheet("font-weight: bold; font-size: 14px; margin-bottom: 5px;")
-            card_layout.addWidget(title_label)
-            
-            # 描述标签
-            desc_label = QLabel("待资源文件下载完成后，安装将会开始 / The installation will begin once the resource files have finished downloading.")
-            desc_label.setWordWrap(True)
-            desc_label.setStyleSheet("color: #666; margin-bottom: 10px;")
-            desc_label.setObjectName('BodyLabel')
-            card_layout.addWidget(desc_label)
-            
-            # 进度条
-            from PyQt5.QtWidgets import QSizePolicy
-            self.download_progress_bar = QProgressBar()
-            self.download_progress_bar.setObjectName('ProgressBar')
-            self.download_progress_bar.setMinimumHeight(14)
-            self.download_progress_bar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-            self.download_progress_bar.setRange(0, 100)
-            self.download_progress_bar.setValue(0)
-            card_layout.addWidget(self.download_progress_bar)
-
-            # 状态标签
-            self.download_progress_label = QLabel('0%')
-            self.download_progress_label.setObjectName('BodyLabel')
-            self.download_progress_label.setAlignment(0x0004)  # Qt.AlignRight
-            card_layout.addWidget(self.download_progress_label)
-            
-            card.setLayout(card_layout)
-            main_layout.addWidget(card)
-            
-            self.downloading_dialog.setLayout(main_layout)
-            
-            # 居中显示对话框
-            self.downloading_dialog.move(
-                self.x() + (self.width() - self.downloading_dialog.width()) // 2,
-                self.y() + (self.height() - self.downloading_dialog.height()) // 2
-            )
-            
-            self.downloading_dialog.show()
-            
-            # 强制刷新
-            QApplication.processEvents()
-        finally:
-            # 确保创建标志在任何路径下都被清理
-            try:
-                self._downloading_dialog_opening = False
-            except Exception:
-                pass
-    def update_download_progress(self, progress):
-        """更新下载进度 - 整合测试程序的成功实现"""
-        logger.info(f"更新进度: {progress}%")
         
-        if self.downloading_dialog and hasattr(self, 'download_progress_bar'):
-            # 尝试设置进度条值
+        # 防止重复创建
+        if hasattr(self, 'downloading_dialog') and self.downloading_dialog and self.downloading_dialog.isVisible():
+            logger.info("下载对话框已存在并可见，跳过创建")
+            self.downloading_dialog.raise_()
+            self.downloading_dialog.activateWindow()
+            return
+
+        from PyQt5.QtWidgets import QDialog, QVBoxLayout, QProgressBar, QLabel, QFrame, QSizePolicy
+
+        # 创建对话框
+        self.downloading_dialog = QDialog(self)
+        self.downloading_dialog.setWindowTitle("正在下载")
+        self.downloading_dialog.setModal(True)
+        # 增大窗口尺寸：确保文本换行有空间，避免截断
+        self.downloading_dialog.resize(560, 260)
+
+        # 创建主布局
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(20, 20, 20, 20)
+        main_layout.setSpacing(10)
+
+        # 准备内容容器
+        card = None
+        if QFLUENT_AVAILABLE:
             try:
-                if hasattr(self.download_progress_bar, 'setValue'):
+                from qfluentwidgets import CardWidget, SubtitleLabel, BodyLabel
+                card = CardWidget()
+                title_label = SubtitleLabel("资源仍在下载中 / The resource is still downloading")
+                desc_label = BodyLabel("待资源文件下载完成后，安装将会开始 / The installation will begin once the resource files have finished downloading.")
+            except ImportError:
+                pass
+        
+        if card is None:
+            card = QFrame()
+            card.setFrameStyle(QFrame.Box)
+            card.setStyleSheet("QFrame { background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 10px; }")
+            title_label = QLabel("资源仍在下载中 / The resource is still downloading")
+            title_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+            desc_label = QLabel("待资源文件下载完成后，安装将会开始 / The installation will begin once the resource files have finished downloading.")
+            desc_label.setStyleSheet("color: #666;")
+
+        # 启用自动换行，防止文字挤在一起
+        title_label.setWordWrap(True)
+        desc_label.setWordWrap(True)
+
+        # 容器布局
+        card_layout = QVBoxLayout()
+        card_layout.setContentsMargins(24, 24, 24, 24)
+        card_layout.setSpacing(16)
+        card_layout.addWidget(title_label)
+        card_layout.addWidget(desc_label)
+        
+        # 添加弹簧，把进度条推到底部
+        card_layout.addStretch(1)
+
+        # 使用标准 QProgressBar：确保即使在高频信号下也能可靠刷新
+        self.download_progress_bar = QProgressBar()
+        self.download_progress_bar.setRange(0, 100)
+        self.download_progress_bar.setValue(0)
+        # 隐藏进度条自带的、位于末尾且容易截断的百分比文字
+        self.download_progress_bar.setTextVisible(False)
+        # 稍微美化一下原生进度条颜色
+        self.download_progress_bar.setStyleSheet("""
+            QProgressBar {
+                border: 1px solid #e0e0e0;
+                border-radius: 4px;
+                background-color: #f0f0f0;
+                height: 12px;
+            }
+            QProgressBar::chunk {
+                background-color: #0078d4;
+                border-radius: 3px;
+            }
+        """)
+        
+        card_layout.addWidget(self.download_progress_bar)
+
+        # 进度文本标签（右对齐）
+        self.download_progress_label = QLabel("0%")
+        self.download_progress_label.setAlignment(Qt.AlignRight)
+        if QFLUENT_AVAILABLE:
+            font = self.download_progress_label.font()
+            self.download_progress_label.setFont(font)
+        
+        card_layout.addWidget(self.download_progress_label)
+        
+        card.setLayout(card_layout)
+        main_layout.addWidget(card)
+        self.downloading_dialog.setLayout(main_layout)
+
+        # 居中显示
+        self.downloading_dialog.move(
+            self.x() + (self.width() - self.downloading_dialog.width()) // 2,
+            self.y() + (self.height() - self.downloading_dialog.height()) // 2
+        )
+        
+        self.downloading_dialog.show()
+        logger.info("下载进度窗口（稳定版）已显示")
+    def update_download_progress(self, progress):
+        """更新下载进度"""
+        # logger.info(f"更新进度: {progress}%") # 减少日志频率，避免IO阻塞影响UI流畅度
+        
+        if self.downloading_dialog and self.downloading_dialog.isVisible():
+            try:
+                # 更新进度条
+                if hasattr(self, 'download_progress_bar'):
                     self.download_progress_bar.setValue(progress)
-                elif hasattr(self.download_progress_bar, 'setProgress'):
-                    self.download_progress_bar.setProgress(progress)
-                else:
-                    # 如果都不存在，直接设置属性
-                    self.download_progress_bar.value = progress
-            except Exception as e:
-                logger.warning(f"更新进度条失败: {e}")
-            
-            # 更新标签文本
-            if hasattr(self, 'download_progress_label') and self.download_progress_label:
-                try:
+                    # 某些情况下显式 update 可以确保 Fluent 组件及时重绘
+                    self.download_progress_bar.update()
+                
+                # 更新标签文本
+                if hasattr(self, 'download_progress_label'):
                     self.download_progress_label.setText(f"{progress}%")
-                except Exception as e:
-                    logger.warning(f"更新标签文本失败: {e}")
-            
-            # 强制刷新UI
-            try:
-                if self.downloading_dialog:
-                    # 尝试强制刷新并触发布局更新，解决进度在调整窗口大小后才显示的问题
-                    try:
-                        self.download_progress_bar.updateGeometry()
-                    except Exception:
-                        pass
-                    try:
-                        layout = self.downloading_dialog.layout()
-                        if layout is not None:
-                            try:
-                                layout.activate()
-                            except Exception:
-                                pass
-                    except Exception:
-                        pass
-                    try:
-                        self.download_progress_bar.repaint()
-                    except Exception:
-                        pass
-                    self.downloading_dialog.repaint()
-                    from PyQt5.QtWidgets import QApplication
-                    QApplication.processEvents()
-            except Exception:
-                logger.exception('刷新下载对话框时出错')
+                
+                # 简单地处理事件循环即可，移除之前的过度刷新逻辑
+                QApplication.processEvents()
+            except Exception as e:
+                logger.warning(f"更新进度UI失败: {e}")
 
     def refresh_download_dialog(self):
         """定期刷新下载对话框（已废弃，不再使用定时刷新）"""
@@ -1061,7 +1677,7 @@ class BloretInstaller(QMainWindow):
         self.cleanup_network_thread()
         
         # 显示错误
-        logger.info("显示错误信息")
+        logger.info(f"显示错误信息: {error_msg}")
         self.show_error(error_msg)
     
     def on_network_error(self, error_msg):
@@ -1089,146 +1705,15 @@ class BloretInstaller(QMainWindow):
     
     def on_install_complete(self):
         """安装完成"""
-        # 弹出完成对话框，提供“完成”和“完成并打开”两个操作
-        self.show_finish_dialog("安装完成", "Bloret Launcher 已成功安装！")
-
-    def _open_installed_path(self):
-        """尝试打开已安装的可执行或包含已下载文件的文件夹"""
-        import subprocess
-        try:
-            path = None
-            # 优先尝试已记录的安装可执行路径
-            path = self.install_config.get('installed_exe') if hasattr(self, 'install_config') else None
-            if not path:
-                path = self.install_config.get('downloaded_file') if hasattr(self, 'install_config') else None
-            if not path:
-                # 没有已知路径，提示用户
-                self.show_error('未找到要打开的文件或路径。')
-                return
-            if os.path.isdir(path):
-                # 打开文件夹
-                if os.name == 'nt':
-                    os.startfile(path)
-                else:
-                    subprocess.Popen(['xdg-open', path])
-            elif os.path.isfile(path):
-                # 如果是文件，尝试打开文件或父目录
-                if path.lower().endswith('.zip') or path.lower().endswith('.tar') or path.lower().endswith('.gz'):
-                    folder = os.path.dirname(path)
-                    if os.name == 'nt':
-                        os.startfile(folder)
-                    else:
-                        subprocess.Popen(['xdg-open', folder])
-                else:
-                    # 可执行或其它文件，尝试直接打开
-                    if os.name == 'nt':
-                        os.startfile(path)
-                    else:
-                        subprocess.Popen([path])
-        except Exception:
-            logger.exception('打开已安装路径失败')
-            self.show_error('打开已安装文件/路径时发生错误')
-
-    def show_finish_dialog(self, title, message):
-        """显示安装完成对话框，包含两个按钮：'完成' 和 '完成并打开'（后者使用 PrimaryPushButton）"""
-        from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QSizePolicy
-
-        dialog = QDialog(self)
-        dialog.setWindowTitle(title)
-        dialog.setModal(True)
-        dialog.resize(480, 160)
-
-        main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(12, 12, 12, 12)
-        main_layout.setSpacing(10)
-
-        # 消息说明
-        msg_label = QLabel(message)
-        msg_label.setWordWrap(True)
-        main_layout.addWidget(msg_label)
-
-        # 底部按钮栏（右对齐）
-        btn_layout = QHBoxLayout()
-        btn_layout.addStretch()
-
-        if QFLUENT_AVAILABLE:
-            try:
-                from qfluentwidgets import PushButton, PrimaryPushButton
-                finish_btn = PushButton('完成')
-                finish_and_open_btn = PrimaryPushButton('完成并打开')
-            except Exception:
-                from PyQt5.QtWidgets import QPushButton
-                finish_btn = QPushButton('完成')
-                finish_and_open_btn = QPushButton('完成并打开')
-                # 给主按钮上色以示 Primary
-                finish_and_open_btn.setStyleSheet('background-color: #0078d4; color: white;')
-        else:
-            from PyQt5.QtWidgets import QPushButton
-            finish_btn = QPushButton('完成')
-            finish_and_open_btn = QPushButton('完成并打开')
-            finish_and_open_btn.setStyleSheet('background-color: #0078d4; color: white;')
-
-        # 连接按钮事件
-        def on_finish():
-            try:
-                dialog.accept()
-            finally:
-                try:
-                    self.close()
-                except Exception:
-                    pass
-
-        def on_finish_and_open():
-            try:
-                # 打开安装路径/可执行
-                self._open_installed_path()
-            finally:
-                try:
-                    dialog.accept()
-                finally:
-                    try:
-                        self.close()
-                    except Exception:
-                        pass
-
-        finish_btn.clicked.connect(on_finish)
-        finish_and_open_btn.clicked.connect(on_finish_and_open)
-
-        # 添加到布局（顺序：完成，完成并打开）
-        btn_layout.addWidget(finish_btn)
-        btn_layout.addWidget(finish_and_open_btn)
-
-        main_layout.addLayout(btn_layout)
-
-        dialog.setLayout(main_layout)
-
-        # 使主按钮有初始焦点
-        try:
-            finish_and_open_btn.setFocus()
-        except Exception:
-            pass
-
-        # 居中显示
-        dialog.move(
-            self.x() + (self.width() - dialog.width()) // 2,
-            self.y() + (self.height() - dialog.height()) // 2
-        )
-
-        dialog.show()
-        try:
-            from PyQt5.QtWidgets import QApplication
-            QApplication.processEvents()
-        except Exception:
-            pass
-        # 将 dialog 保存在实例上方便测试/后续操作
-        self._finish_dialog = dialog
+        # 逻辑已移至 Page3 内部处理，此处仅做日志记录
+        logger.info("安装流程已全部完成")
         
     def show_error(self, message):
         """显示错误信息"""
         if QFLUENT_AVAILABLE:
             InfoBar.error(
                 title='错误',
-                content=message,
+                content=message+"\n请重启 Bloret Launcher Setup 安装程序。",
                 orient=Qt.Horizontal,
                 isClosable=True,
                 position=InfoBarPosition.TOP,
