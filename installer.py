@@ -504,7 +504,7 @@ class Page3(QWidget):
         
         # 尝试从 URL 加载图片
         self.image_label = StrongBodyLabel()
-        self.image_label.setFixedSize(382, 297)
+        self.image_label.setFixedSize(382, 488)
         self.image_label.setScaledContents(True)
         
         try:
