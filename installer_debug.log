@@ -21300,3 +21300,16 @@ OSError: [WinError 87] 参数错误。
 [2026-01-07 12:40:15,263] INFO - 已删除下载的zip文件: C:\Users\0570\AppData\Local\Temp\Bloret-Launcher-Setup.zip
 [2026-01-07 12:40:15,264] DEBUG - 检查临时解压目录是否存在: True
 [2026-01-07 12:40:15,265] INFO - 正在清理临时解压目录: C:\Users\0570\AppData\Local\Temp\bloret_temp
+[2026-01-07 12:54:22,713] DEBUG - Starting new HTTP connection (1): 127.0.0.1:7890
+[2026-01-07 12:54:22,789] DEBUG - http://127.0.0.1:7890 "GET http://pcfs.eno.ink:3001/BL.png HTTP/1.1" 200 8154618
+[2026-01-07 12:54:30,835] DEBUG - Starting new HTTP connection (1): 127.0.0.1:7890
+[2026-01-07 12:54:30,985] DEBUG - http://127.0.0.1:7890 "GET http://pcfs.eno.ink:3001/BLlight.png HTTP/1.1" 200 680245
+[2026-01-07 12:54:31,808] INFO - 开始获取版本信息
+[2026-01-07 12:54:31,914] DEBUG - Starting new HTTP connection (1): 127.0.0.1:7890
+[2026-01-07 12:54:32,025] DEBUG - http://127.0.0.1:7890 "GET http://pcfs.eno.ink:3001/api/info HTTP/1.1" 200 1655
+[2026-01-07 12:54:32,037] INFO - 成功获取版本信息: {'latestVersion': '8.1', 'description': 'Conveniently manage your Minecraft, conveniently play Bloret. 便捷地管理你的 Minecraft，便捷地游玩 Bloret。', 'newVersionDescription': '我们迫不及待让你体验到新功能！欢迎体验 BL 8.1\n\n有什么新东西吗？\n\nNuitka 打包\nBloret Launcher 运行速度将会得到极大的提升\n\nBloriko 询问功能\nBloret 服务器信息查询功能\n以上两项新功能是 Bloret Launcher 对 Bloret 服务器融合的巨大进步！欢迎体验反馈！', 'beta': {'enabled': True, 'version': '26b2', 'versionName': '26 Beta 2', 'description': 'Bloriko with Modrinth、Bloriko DeepThink 和其他一些功能，更多信息请访问：https://github.com/BloretCrew/Bloret-Launcher/releases/tag/26b2'}, 'downloads': {'stable': {'gitcode': {'exe': 'https://gitcode.com/Bloret/Bloret-Launcher/releases/download/8.1/Bloret-Launcher-Setup.exe', 'zip': 'https://gitcode.com/Bloret/Bloret-Launcher/releases/download/8.1/Bloret-Launcher-Windows.zip'}, 'github': {'exe': 'https://github.com/BloretCrew/Bloret-Launcher/releases/download/8.1/Bloret-Launcher-Setup.exe', 'zip': 'https://github.com/BloretCrew/Bloret-Launcher/releases/download/8.1/Bloret-Launcher-Windows.zip'}}, 'beta': {'gitcode': {'exe': 'https://gitcode.com/Bloret/Bloret-Launcher/releases/download/26b2/Bloret-Launcher-Setup.exe', 'zip': 'https://gitcode.com/Bloret/Bloret-Launcher/releases/download/26b2/Bloret-Launcher-Windows.zip'}, 'github': {'exe': 'https://github.com/BloretCrew/Bloret-Launcher/releases/download/26b2/Bloret-Launcher-Setup.exe', 'zip': 'https://github.com/BloretCrew/Bloret-Launcher/releases/download/26b2/Bloret-Launcher-Windows.zip'}}}}
+[2026-01-07 12:54:32,524] INFO - 开始清理网络线程
+[2026-01-07 12:54:32,531] INFO - 正在停止网络线程
+[2026-01-07 12:54:32,538] INFO - 网络线程已清理
+[2026-01-07 12:54:32,539] INFO - 清理网络工作对象
+[2026-01-07 12:54:32,541] INFO - 网络线程清理完成

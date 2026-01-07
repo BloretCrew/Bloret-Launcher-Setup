@@ -18,15 +18,21 @@ from PyQt5 import uic
 import ctypes
 import traceback
 
+loglog = False
+
 # 配置日志
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('installer_debug.log', encoding='utf-8'),
-        logging.StreamHandler()
-    ]
-)
+if loglog:
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='[%(asctime)s] %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler('installer_debug.log', encoding='utf-8'),
+            logging.StreamHandler()
+        ]
+    )
+else:
+    logging.disable(logging.CRITICAL)
+
 logger = logging.getLogger(__name__)
 
 # 尝试导入 QFluentWidgets
