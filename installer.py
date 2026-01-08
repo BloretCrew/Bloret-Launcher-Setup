@@ -1314,12 +1314,18 @@ class BloretInstaller(QMainWindow):
         import threading as _threading
         self._downloading_dialog_lock = _threading.Lock()
         
+        # 检查快速启动参数
+        self.is_quickstart = "--quickstart" in sys.argv
+        
         # 初始化 UI
         self.initUI()
         
         # 启动时获取版本信息（测试时可传入 fetch_version=False 以避免网络线程）
         if fetch_version:
             self.fetch_version_info()
+        elif self.is_quickstart:
+            # 如果不获取版本但启用了快速启动，直接开始
+            QTimer.singleShot(0, self.on_quick_install)
         
     def initUI(self):
         # 创建中央窗口和主布局
@@ -1486,9 +1492,15 @@ class BloretInstaller(QMainWindow):
         except Exception as e:
             print(f"处理版本信息失败: {e}")
             self.on_network_error(f"处理版本信息失败: {e}")
+            return
         
         # 清理线程
         self.cleanup_network_thread()
+
+        # 如果开启了快速启动模式，自动开始快速安装
+        if self.is_quickstart:
+            logger.info("快速启动模式：收到版本信息，自动开始快速安装")
+            self.on_quick_install()
     
     def start_download(self):
         """开始下载 - 整合测试程序的成功实现"""
