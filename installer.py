@@ -87,7 +87,7 @@ class Page1(QWidget):
         
         # 尝试从 URL 加载 Logo
         try:
-            response = requests.get("http://pcfs.eno.ink:3001/BL.png", timeout=5)
+            response = requests.get("https://launcher.bloret.net/BL.png", timeout=5)
             pixmap = QPixmap()
             pixmap.loadFromData(response.content)
             if not pixmap.isNull():
@@ -513,7 +513,7 @@ class Page3(QWidget):
         self.image_label.setScaledContents(True)
         
         try:
-            response = requests.get("http://pcfs.eno.ink:3001/BLlight.png", timeout=5)
+            response = requests.get("https://launcher.bloret.net/BLlight.png", timeout=5)
             pixmap = QPixmap()
             pixmap.loadFromData(response.content)
             if not pixmap.isNull():
@@ -1037,7 +1037,7 @@ class NetworkWorker(QObject):
         """获取版本信息"""
         logger.info("开始获取版本信息")
         try:
-            response = requests.get('http://pcfs.eno.ink:3001/api/info', timeout=10)
+            response = requests.get('https://launcher.bloret.net/api/info', timeout=10)
             response.raise_for_status()
             data = response.json()
             logger.info(f"成功获取版本信息: {data}")
