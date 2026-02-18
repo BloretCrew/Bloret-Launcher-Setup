@@ -1073,21 +1073,20 @@ class NetworkWorker(QObject):
                             # 确保进度不超过100
                             progress = min(progress, 100)
                             current_time = time.time()
-                            # 只在进度有变化且间隔超过100ms时才更新，避免过于频繁
-                            if progress != last_progress and (current_time - last_update_time) > 0.1:
+                            # 只在进度每增加5%或完成时更新
+                            if (progress // 5 > last_progress // 5) or progress == 100:
                                 # 减少日志频率，只在关键进度点记录
                                 if progress % 10 == 0:
                                     logger.debug(f"下载进度: {progress}%")
                                 self.download_progress.emit(progress)
                                 last_progress = progress
                                 last_update_time = current_time
-                                # 不再添加延迟，让下载更流畅
                         else:
                             # 如果无法获取总大小，使用模拟进度
                             if downloaded % (512 * 1024) == 0:  # 每512KB更新一次，更频繁
                                 simulated_progress = min(int((downloaded / (50 * 1024 * 1024)) * 100), 95)  # 假设50MB文件
                                 current_time = time.time()
-                                if simulated_progress != last_progress and (current_time - last_update_time) > 0.1:
+                                if (simulated_progress // 5 > last_progress // 5):
                                     # 减少日志频率，只在关键进度点记录
                                     if simulated_progress % 10 == 0:
                                         logger.debug(f"模拟下载进度: {simulated_progress}%")
@@ -1847,8 +1846,16 @@ def is_dark_theme():
 def main():
     """主函数"""
     # 启用高 DPI 缩放
+    os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
+    
+    # 尝试设置缩放策略
     try:
-        QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.PassThrough)
+        QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
+    except:
+        pass
+        
+    # 尝试启用高 DPI 缩放属性
+    try:
         QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
         QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
     except:
