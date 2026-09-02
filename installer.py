@@ -7,7 +7,9 @@ import sys
 from pathlib import Path
 
 from blsetup.domain import InstallEvent, InstallState
-from blsetup.runner import InstallRunner
+from blsetup.preflight import check_target
+from blsetup.runner import InstallRunner, RunnerDependencies
+from blsetup.services import atomic_install, download_package, extract_archive, rollback
 from blsetup.windows import default_install_dir, user_cache_dir
 
 try:
@@ -27,7 +29,13 @@ if QApplication is not None:
     class InstallerWindow(QMainWindow):
         def __init__(self, runner: InstallRunner | None = None) -> None:
             super().__init__()
-            self.runner = runner
+            self.runner = runner or InstallRunner(RunnerDependencies(
+                preflight=check_target,
+                downloader=download_package,
+                extractor=extract_archive,
+                installer=atomic_install,
+                rollbacker=rollback,
+            ), emit=self.render_event)
             self.setWindowTitle("Bloret Launcher Setup")
             self.resize(720, 520)
             card = QFrame(objectName="card")
