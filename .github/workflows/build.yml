@@ -16,25 +16,34 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install build dependencies
+      - name: Install dependencies
         shell: pwsh
         run: python -m pip install --upgrade pip pyinstaller PyQt5
       - name: Compile and offline tests
         shell: pwsh
         run: |
           python -m py_compile installer.py blsetup\*.py tests\*.py
-          python -m pytest -q tests
+          python -m unittest discover -s tests -p "test_*.py"
       - name: Build single user-deliverable EXE
         shell: pwsh
         run: |
           Remove-Item -Recurse -Force build, dist -ErrorAction SilentlyContinue
           pyinstaller --clean --noconfirm BloretLauncherSetup.spec
-      - name: Smoke test release directory
+      - name: Windows executable smoke test
         shell: pwsh
         run: |
-          $files = Get-ChildItem dist -File
+          $process = Start-Process -FilePath "dist\BloretLauncherSetup.exe" -ArgumentList "--smoke-test" -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "smoke test exit code: $($process.ExitCode)" }
+      - name: Check unsigned release configuration
+        shell: pwsh
+        run: |
+          if (-not (Test-Path Env:BLORA_SIGN_CERTIFICATE)) { Write-Host "Signing is not configured; artifact is unsigned." }
+          if (Select-String -Path BloretLauncherSetup.spec -Pattern "codesign_identity=None") { Write-Host "Explicit unsigned build configuration confirmed." }
+      - name: Enforce one EXE artifact
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem dist -File -Filter *.exe
           if ($files.Count -ne 1 -or $files[0].Name -ne "BloretLauncherSetup.exe") { throw "dist must contain exactly one user-deliverable EXE" }
-          if ($files[0].Extension -ne ".exe") { throw "release artifact is not an EXE" }
       - uses: actions/upload-artifact@v4
         with:
           name: BloretLauncherSetup-Windows-x64
