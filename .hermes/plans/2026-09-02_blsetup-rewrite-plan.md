@@ -6,7 +6,7 @@
 
 **Architecture:** 新建独立 rewrite 分支，尽量不在旧代码上打补丁。项目第一阶段只支持 Windows，不为 Linux/macOS 设计兼容层。整体采用“薄 UI + 可测试领域层 + 受控副作用适配层”的架构：UI 只展示状态并发出命令；流程编排器管理状态机；下载、清单、签名/hash 校验、文件替换、快捷方式、权限和回滚分别由独立服务负责。安装器与被安装的 Launcher 解耦，使用稳定的 manifest/schema 和版本化安装布局，避免 UI、下载逻辑、安装路径相互耦合。
 
-**Windows Architecture:** Windows 版本明确拆成 Bootstrapper、Installer Core、Update/Recovery Engine、Renderer/UI 四层。Bootstrapper 负责启动、单实例、版本自检和必要的管理员权限提升；Installer Core 负责 manifest、下载、校验、解包、原子安装和 rollback；Update/Recovery Engine 负责安装前快照、失败恢复、残留清理和重启后恢复；Renderer 只通过受控 IPC 调用白名单命令，不直接访问文件系统、Registry、PowerShell 或进程。需要管理员权限的操作集中在最小化的 elevated helper 中，普通 UI 进程不以管理员权限运行。
+**Windows Architecture:** Windows 版本明确拆成 Bootstrapper、Installer Core、Update/Recovery Engine、Renderer/UI 四层。对最终用户只发布一个安装器 `.exe`；Bootstrapper、Installer Core、Update/Recovery Engine、Renderer/UI 以及必要的 elevated helper 都必须作为单一安装器的内部资源或内部模块打包，不能要求用户单独下载、运行或管理第二个 exe。Bootstrapper 负责启动、单实例、版本自检和必要的管理员权限提升；Installer Core 负责 manifest、下载、校验、解包、原子安装和 rollback；Update/Recovery Engine 负责安装前快照、失败恢复、残留清理和重启后恢复；Renderer 只通过受控 IPC 调用白名单命令，不直接访问文件系统、Registry、PowerShell 或进程。需要管理员权限的操作集中在安装器内部的最小化提权流程中，普通 UI 进程不以管理员权限运行。
 
 **Tech Stack:** 以当前项目实际 Windows 技术栈为基础，接入 `/data/blora-design` 的 Blora Design 资源/API；具体运行时、打包方式、签名、安装目录和提权机制在 Task 1 只读确认后确定。
 
@@ -72,9 +72,9 @@ backup/pre-blora-rewrite-2026-09-02
 
 将 UI 状态订阅到领域层事件；统一 loading/error/cancel/retry；错误展示具体阶段、原因、建议和日志 ID，不泄露路径中的敏感信息。退出/重启后能恢复或明确重新开始。
 
-### Task 7：Windows 打包与发布
+### Task 7：Windows 单一安装器打包与发布
 
-只验证 Windows x64（其他架构和操作系统暂不支持）。确认安装包不携带开发机路径、凭据或测试数据；验证安装器签名、安装/卸载、升级覆盖、快捷方式、文件关联、Windows Defender/SmartScreen 相关发布要求和 CI 构建。补充 Windows smoke test。资源定位、用户目录、进程退出码和权限提升必须在真实 Windows 环境验证。
+只验证 Windows x64（其他架构和操作系统暂不支持）。最终用户只下载并运行一个安装器 `.exe`，例如 `BloretLauncherSetup.exe`；不发布第二个 bootstrapper.exe、helper.exe 或单独更新器供用户操作。所有 UI、安装核心、更新/恢复逻辑、必要资源和提权流程都以内嵌资源或内部模块方式由这个安装器管理；如果技术上必须生成临时子进程，必须由安装器自动创建、签名校验、使用后清理，不能作为用户交付物或要求用户单独运行。确认安装包不携带开发机路径、凭据或测试数据；验证安装器签名、安装/卸载、升级覆盖、快捷方式、文件关联、Windows Defender/SmartScreen 相关发布要求和 CI 构建。补充 Windows smoke test，明确检查发布目录中用户交付的安装器只有一个 `.exe`。资源定位、用户目录、进程退出码和权限提升必须在真实 Windows 环境验证。
 
 ### Task 7：验收与文档
 
@@ -94,8 +94,9 @@ backup/pre-blora-rewrite-2026-09-02
 ## Git 纪律
 
 - 当前开发分支：`rewrite/blora-design-2`；
-- 备份分支：`backup/pre-blora-rewrite-2026-09-02`；
+- `backup/pre-blora-rewrite-2026-09-02`；
 - 第一阶段平台范围：Windows x64；不实现 Linux/macOS 兼容层；
+- 最终交付物：用户只接触一个安装器 `.exe`；所有内部模块、提权流程和运行资源均由该安装器管理；
 - 只 commit 不 push；
 - 每个阶段独立提交；
 - 不 reset，不删除备份分支；
