@@ -23,7 +23,7 @@ jobs:
         shell: pwsh
         run: |
           python -m py_compile installer.py blsetup\*.py tests\*.py
-          python -m unittest discover -s tests -p "test_*.py"
+          python -m pytest -q tests
       - name: Build single user-deliverable EXE
         shell: pwsh
         run: |
