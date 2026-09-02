@@ -1,1 +1,10 @@
 installer_debug.log
+build/
+dist/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.log
+*.part
+*.zip
+*.exe

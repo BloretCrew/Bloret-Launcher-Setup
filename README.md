@@ -1,77 +1,35 @@
-# Bloret-Launcher-Setup
-百络谷启动器在线安装程序
+# Bloret Launcher Setup
 
-基于 PyQt6 和 QFluentWidgets 的安装向导程序。
+Windows x64 安装器（重写版）。用户交付物只有一个 `BloretLauncherSetup.exe`，内部包含 UI、Installer Core 和恢复逻辑；不要求用户单独下载或运行 bootstrapper/helper/update.exe。
 
-## 功能特点
+## 开发验证
 
-- 🎨 现代化的 Fluent Design 界面
-- 📦 支持快速安装和自定义安装
-- 📁 可自定义安装路径
-- 🖥️ 可选桌面快捷方式和启动菜单项
-- 📊 实时安装进度显示
-- 🌐 中英文双语界面
-
-## 安装依赖
+Linux 开发机不能运行 Windows GUI、Windows 提权、Registry、快捷方式或 Defender/SmartScreen。可执行以下离线验证：
 
 ```bash
-pip install -r requirements.txt
+python -m py_compile installer.py blsetup/*.py tests/*.py
+python -m pytest -q tests
 ```
 
-## 运行程序
+测试只使用临时目录、伪造 ZIP 和本地 `file://` 清单，不访问生产下载源、不覆盖真实安装目录。若环境未安装 pytest，可使用仓库 CI 的 Windows smoke test。
 
-```bash
-python installer.py
+## 架构与安全
+
+详见 [`ARCHITECTURE.md`](ARCHITECTURE.md)。安装流程由无 UI 领域状态机驱动：环境检查、清单解析、准备、下载、SHA-256 校验、原子替换、备份和回滚。ZIP 解包拒绝路径穿越、符号链接和超出大小限制的内容。
+
+PyQt 不能直接使用 Web Custom Elements 或 CSS cascade layers，因此 `blsetup/tokens.py` 保留 Blora Design 2.x 官方语义 token 名称，并在 Qt stylesheet 中进行有限的值映射。这是适配边界，不是对 Web 组件 API 的模拟；实际 token 来源已在架构文档中记录。
+
+## 构建
+
+在 Windows x64 上运行：
+
+```powershell
+python -m pip install pyinstaller PyQt5
+pyinstaller --clean --noconfirm BloretLauncherSetup.spec
 ```
 
-## 界面预览
+发布目录必须且只能有 `dist/BloretLauncherSetup.exe`。不要提交 `build/`、`dist/`、`__pycache__/`、日志、缓存、真实安装包、凭据或签名密钥。CI 会检查该单一产物规则。
 
-### 1. 欢迎页面
-- 显示应用 Logo 和基本信息
-- 提供快速安装和自定义安装选项
+## Windows 未验证项
 
-### 2. 安装路径选择
-- 默认安装到 AppData 目录
-- 支持自定义安装路径
-
-### 3. 附加选项
-- 可选桌面快捷方式
-- 可选启动菜单项
-
-### 4. 安装进度
-- 实时显示安装进度
-- 安装完成后自动关闭
-
-## 项目结构
-
-```
-Bloret-Launcher-Setup/
-├── installer.py          # 主程序
-├── page1.py              # 欢迎页面
-├── page2_1.py            # 安装路径选择页面
-├── page2_2.py            # 附加选项页面
-├── page3.py              # 安装进度页面
-├── requirements.txt      # 依赖文件
-├── README.md             # 说明文档
-└── ui/                   # UI 资源文件
-    ├── bloret.png        # 应用图标
-    ├── bloret.ico        # 窗口图标
-    ├── BLroundHome.png   # 背景图片
-    └── *.ui              # Qt Designer 文件
-```
-
-## 自定义说明
-
-- 替换 `ui/bloret.png` 和 `ui/bloret.ico` 可以更改应用图标
-- 替换 `ui/BLroundHome.png` 可以更改安装页面的背景图片
-- 修改各页面的文本内容可以自定义显示信息
-
-## 注意事项
-
-- 确保已安装 PyQt6 和 QFluentWidgets
-- 程序需要管理员权限来创建快捷方式和写入系统目录
-- 安装路径需要确保有足够的磁盘空间
-
-> [!WARNING]
-> 本仓库因仓库所有者 @Detritalw 而参与 [百日会战计划 #20](https://github.com/BloretCrew/Bloret-Launcher/discussions/20) ，暂时停止维护，约 100 天后解除。  
-> 如有问题，请找 @RhedarLiu
+当前 Linux 环境未验证真实 Windows GUI 渲染、系统/架构检查、UAC 提权、单实例锁、Registry/快捷方式、安装/卸载/升级、签名、Windows Defender/SmartScreen、崩溃重启恢复及最终 EXE 的视觉快照。这些必须在受控 Windows x64 机器上完成验收后才能宣称发布就绪。
