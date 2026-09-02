@@ -27,15 +27,16 @@ class PackageManifest:
         try:
             schema = int(data["schema_version"])
             version = str(data["version"])
-            url = str(data["package"]["url"])
-            size = int(data["package"]["size"])
-            sha256 = str(data["package"]["sha256"]).lower()
+            package = data["package"]
+            url = str(package["url"])
+            size = int(package["size"])
+            sha256 = str(package["sha256"]).lower()
         except (KeyError, TypeError, ValueError) as exc:
             raise ManifestError("manifest fields are incomplete") from exc
         parsed = urlparse(url)
         if schema != 1:
             raise ManifestError(f"unsupported manifest schema: {schema}")
-        if not version or parsed.scheme not in {"https", "file"} or not parsed.netloc and parsed.scheme == "https":
+        if not version or parsed.scheme not in {"https", "file"} or (parsed.scheme == "https" and not parsed.netloc):
             raise ManifestError("manifest contains an invalid package URL or version")
         if size < 1 or size > 4 * 1024 * 1024 * 1024:
             raise ManifestError("package size is outside the supported limit")
@@ -67,6 +68,6 @@ def safe_archive_member(name: str) -> PurePosixPath:
     if "\\" in name or not name or name.startswith("/"):
         raise ManifestError("archive contains an unsafe path")
     path = PurePosixPath(name)
-    if path.is_absolute() or any(part in {"", ".", ".."} for part in path.parts):
+    if path.is_absolute() or ":" in path.parts[0] or any(part in {"", ".", ".."} for part in path.parts):
         raise ManifestError("archive contains a path traversal entry")
     return path

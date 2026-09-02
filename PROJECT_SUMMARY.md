@@ -1,142 +1,31 @@
-# Bloret Launcher 安装向导 - 项目总结
+# BLsetup 重写项目总结
 
-## 项目概述
+本分支将旧版页面内副作用重写为 Windows x64 安装器架构。最终用户只获得一个 `BloretLauncherSetup.exe`。
 
-基于 PyQt6 和 QFluentWidgets 开发的现代化安装向导程序，为 Bloret Launcher 提供完整的安装体验。
+## 当前已实现
 
-## 已完成功能
+- 无 UI 的领域状态机和 `InstallRunner` 编排器
+- 可注入的环境预检、manifest 获取、下载、SHA-256 校验、ZIP 安全解包、原子安装、备份回滚
+- `file://` manifest/package 离线测试注入，不使用生产下载 URL
+- 取消、失败、可恢复错误、恢复 marker 和单实例锁边界
+- Windows x64 平台检查、默认 `%APPDATA%` 安装目录、用户缓存目录
+- 快捷方式适配器边界：仅 Windows 且依赖可用时执行，不伪造跨平台成功
+- PyQt UI 仅展示领域事件并触发 runner；PyQt 缺失时模块仍可安全导入，只有启动 GUI 时失败
+- Blora Design 2.x 官方语义 token 名称映射。PyQt 不直接渲染 Web Custom Elements，适配边界见 `ARCHITECTURE.md`
+- 唯一 PyInstaller Windows x64 构建 workflow，构建 smoke test 要求 `dist` 只有一个 EXE
 
-### 🎨 界面设计
-- **现代化 Fluent Design 风格**: 采用微软 Fluent Design 设计语言
-- **响应式布局**: 适配不同屏幕尺寸和 DPI 设置
-- **双语支持**: 中英文双语界面，满足不同用户需求
-- **自定义图标**: 支持应用图标和背景图片自定义
+## 离线验证
 
-### 📦 安装功能
-- **快速安装**: 一键安装到默认路径（AppData）
-- **自定义安装**: 支持用户选择安装路径
-- **路径验证**: 自动验证安装路径有效性
-- **权限检查**: 检测必要的写入权限
-
-### 🖥️ 附加选项
-- **桌面快捷方式**: 可选创建桌面快捷方式
-- **启动菜单项**: 可选添加到启动菜单
-- **默认启用**: 附加选项默认勾选，提升用户体验
-
-### 📊 进度显示
-- **实时进度**: 动态显示安装进度百分比
-- **步骤提示**: 显示当前安装步骤信息
-- **完成通知**: 安装完成后自动提示
-- **错误处理**: 友好的错误提示和处理
-
-## 项目结构
-
-```
-Bloret-Launcher-Setup/
-├── installer.py          # 主程序（标准版）
-├── installer_v2.py       # 改进版（增强错误处理）
-├── page1.py              # 欢迎页面
-├── page2_1.py            # 安装路径选择页面
-├── page2_2.py            # 附加选项页面
-├── page3.py              # 安装进度页面
-├── setup.py              # 自动设置脚本
-├── run_installer.bat     # Windows 启动脚本
-├── requirements.txt      # 依赖文件
-├── README.md             # 项目说明
-└── ui/                   # UI 资源文件
-    ├── bloret.png        # 应用图标
-    ├── bloret.ico        # 窗口图标
-    ├── BLroundHome.png   # 背景图片
-    └── *.ui              # Qt Designer 文件
-```
-
-## 技术特点
-
-### 核心框架
-- **PyQt6**: 现代化的 Python GUI 框架
-- **QFluentWidgets**: 专业的 Fluent Design 组件库
-- **Python 3.8+**: 支持最新 Python 特性
-
-### 设计模式
-- **页面导航**: 使用 QStackedWidget 实现页面切换
-- **信号槽机制**: PyQt 的信号槽机制处理用户交互
-- **模块化设计**: 各页面独立成模块，便于维护
-- **配置管理**: 集中管理安装配置信息
-
-### 错误处理
-- **依赖检查**: 自动检测 QFluentWidgets 可用性
-- **后备方案**: 提供标准 Qt 组件作为后备
-- **异常捕获**: 完善的异常处理和用户提示
-- **资源检查**: 自动检查图标和图片资源
-
-## 使用说明
-
-### 快速启动
 ```bash
-# 方法1: 直接运行（需要已安装依赖）
-python installer.py
-
-# 方法2: 使用改进版（更好的错误处理）
-python installer_v2.py
-
-# 方法3: 使用批处理脚本（Windows）
-double-click run_installer.bat
-
-# 方法4: 自动设置和运行
-python setup.py
+python -m py_compile installer.py blsetup/*.py tests/*.py
+python -m unittest discover -s tests -p 'test_*.py'
+python installer.py --smoke-test
 ```
 
-### 安装依赖
-```bash
-pip install -r requirements.txt
-```
+如安装环境没有 pytest，使用上述 `unittest` 或自包含临时目录 smoke test。测试不得访问生产 URL、真实安装目录、真实包或凭据。
 
-## 自定义指南
+## 明确未完成/未验证
 
-### 更换图标
-1. 替换 `ui/bloret.png` - 应用主图标（100x100px）
-2. 替换 `ui/bloret.ico` - 窗口图标（32x32px）
-3. 替换 `ui/BLroundHome.png` - 背景图片（382x297px）
+Linux 上无法验证 Windows GUI、UAC 提权、真实 Windows 单实例语义、Registry、快捷方式实际创建、安装/卸载/升级、崩溃后恢复、Windows x64 PyInstaller 运行、代码签名、Defender/SmartScreen 和视觉快照。签名配置仅作 CI 占位检查，当前不能声称 EXE 已签名。
 
-### 修改文本
-- 各页面模块中的文本内容可以直接修改
-- 支持 HTML 标签和富文本格式
-- 建议保持中英文对照格式
-
-### 调整样式
-- 主程序中设置了全局样式表
-- 支持自定义颜色、字体、间距等
-- 遵循 QFluentWidgets 的主题系统
-
-## 注意事项
-
-### 系统要求
-- **操作系统**: Windows 10/11 推荐
-- **Python**: 3.8 或更高版本
-- **权限**: 需要管理员权限创建快捷方式
-- **磁盘空间**: 确保安装路径有足够空间
-
-### 已知限制
-- 当前为模拟安装过程，实际文件操作需要扩展
-- 快捷方式创建功能需要管理员权限
-- 路径验证可以进一步增强
-
-### 未来改进
-- [ ] 添加实际文件解压和复制功能
-- [ ] 增强路径验证和权限检查
-- [ ] 支持更多安装选项（如关联文件类型）
-- [ ] 添加卸载功能
-- [ ] 支持多语言切换
-- [ ] 添加安装日志记录
-
-## 开发建议
-
-1. **测试环境**: 建议在虚拟机中测试安装过程
-2. **错误处理**: 充分考虑各种异常情况
-3. **用户体验**: 保持界面简洁，操作直观
-4. **性能优化**: 安装过程避免界面卡顿
-5. **安全性**: 验证所有用户输入和文件操作
-
-## 总结
-
-本项目成功创建了一个功能完整、界面美观的安装向导程序，为 Bloret Launcher 提供了专业的安装体验。程序具有良好的扩展性和可定制性，可以作为其他软件安装向导的模板使用。
+根目录旧页面、`.ui` 和历史测试保留作迁移参考，不属于新入口；CI 只发现 `tests/` 下的新离线测试，旧脚本不会被静默混入新测试套件。
