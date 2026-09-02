@@ -8,7 +8,7 @@
 
 旧入口是 `installer.py`，页面模块为 `page1.py`、`page2_1.py`、`page2_2.py`、`page3.py`。旧流程由页面直接控制：欢迎页触发快速/自定义安装，路径页写入配置，选项页收集快捷方式选项，进度页启动线程并模拟步骤或解压 ZIP 后复制文件。旧入口包含网络 Logo 请求、页面内下载/解压/复制、覆盖目标文件和进程启动等副作用；没有 manifest schema、包 hash、签名校验、原子替换或可靠 rollback。现有 `*.ui`、`scripts/` 和旧页面仅作为历史参考，阶段三入口不会调用它们。
 
-现有 `Bloret-Launcher-Installer.spec` 与 `.github/workflows/build.yml` 会打包旧入口，并额外复制源码/资源，违反“单一用户交付 EXE”目标；阶段四将替换为只产出一个 EXE 的规则。`build/`、`dist/`、`__pycache__/`、日志和真实包均不应进入提交。
+历史上的 `Bloret-Launcher-Installer.spec` 与旧 workflow 曾打包旧入口并额外复制源码/资源，违反“单一用户交付 EXE”目标；现已由 `BloretLauncherSetup.spec` 和唯一 PyInstaller workflow 替代。`build/`、`dist/`、`__pycache__/`、日志和真实包均不应进入提交。
 
 ## 分层边界
 
@@ -45,4 +45,4 @@ FAILED -- RETRY --> CHECKING
 
 已从 `/data/blora-design/packages/tokens/src/semantic/` 确认实际 token 名称，包括 `--blora-color-surface-canvas`、`--blora-color-surface-default`、`--blora-color-text-primary`、`--blora-color-text-secondary`、`--blora-color-action-primary-default`、`--blora-color-status-danger/success/warning`，以及 layout 的 `--blora-control-*` 和 `--blora-button-*` 语义。PyQt 桌面程序不能直接消费 Web Custom Elements 或浏览器 cascade layers，因此 UI 适配层保留官方 token 名称作为常量/样式映射，不伪造 Custom Element；最终渲染使用 Qt stylesheet 的等价值。组件行为边界记录在 UI 代码和 README 中。
 
-阶段一未在 Windows 上验证 GUI、提权、Registry、快捷方式、签名、Defender/SmartScreen、安装/卸载和真实打包 EXE；这些是阶段四的明确未验证项，Linux 只运行离线 pytest/py_compile。
+当前仍未在 Windows 上验证 GUI、提权、Registry、快捷方式、签名、Defender/SmartScreen、安装/卸载、崩溃恢复和真实打包 EXE；Linux 仅运行离线 py_compile/unittest，CI 负责 Windows 构建和 `--smoke-test` 退出码检查。

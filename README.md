@@ -8,7 +8,7 @@ Linux 开发机不能运行 Windows GUI、Windows 提权、Registry、快捷方�
 
 ```bash
 python -m py_compile installer.py blsetup/*.py tests/*.py
-python -m pytest -q tests
+python -m unittest discover -s tests -p 'test_*.py'
 ```
 
 测试只使用临时目录、伪造 ZIP 和本地 `file://` 清单，不访问生产下载源、不覆盖真实安装目录。若环境未安装 pytest，可使用仓库 CI 的 Windows smoke test。
